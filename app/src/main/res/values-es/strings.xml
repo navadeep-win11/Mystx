@@ -1,6 +1,6 @@
 <resources>
-    <string name="app_name">SwiftSlate</string>
-    <string name="accessibility_service_label">Asistente SwiftSlate</string>
+    <string name="app_name">Mystx</string>
+    <string name="accessibility_service_label">Asistente Mystx</string>
     <string name="accessibility_service_desc">Proporciona reemplazos de texto con IA en todo el sistema al escribir comandos de activación.</string>
 
     <!-- Dashboard -->
@@ -47,6 +47,7 @@
     <string name="settings_provider_title">Proveedor</string>
     <string name="settings_provider_gemini">Google Gemini</string>
     <string name="settings_provider_groq">Groq</string>
+    <string name="settings_provider_bai">B.ai</string>
     <string name="settings_provider_custom">Personalizado (compatible con OpenAI)</string>
     <string name="settings_model_title">Modelo</string>
     <string name="settings_endpoint_title">Endpoint</string>
@@ -105,7 +106,7 @@
     <string name="process_text_retry">Reintentar</string>
     <string name="process_text_copied">Copiado</string>
     <string name="process_text_no_selection">No hay texto seleccionado</string>
-    <string name="process_text_no_commands">No hay comandos disponibles. Añade uno en SwiftSlate.</string>
+    <string name="process_text_no_commands">No hay comandos disponibles. Añade uno en Mystx.</string>
     <string name="toast_restore_failed">No se pudo restaurar el texto original</string>
     <string name="toast_nothing_to_undo">Nada que deshacer</string>
     <string name="toast_undo_failed">No se pudo deshacer</string>
@@ -129,8 +130,8 @@
 
     <!-- Updates and command descriptions -->
     <string name="update_channel_name">Actualizaciones de la app</string>
-    <string name="update_channel_desc">Notifica cuando hay una nueva versión de SwiftSlate disponible</string>
-    <string name="update_available_title">Actualización de SwiftSlate disponible</string>
+    <string name="update_channel_desc">Notifica cuando hay una nueva versión de Mystx disponible</string>
+    <string name="update_available_title">Actualización de Mystx disponible</string>
     <string name="update_available_text">Toca para ver la última versión</string>
     <string name="error_input_too_long">El texto es demasiado largo para el límite de tokens por minuto de este modelo. Vuelve a intentarlo con un texto más corto.</string>
     <string name="note_response_truncated">[Nota: la respuesta puede estar cortada]</string>
@@ -141,7 +142,7 @@
     <string name="settings_fetch_models_success">%1$d modelos cargados</string>
     <string name="settings_fetch_models_empty">No se encontraron modelos. Puedes introducir uno manualmente.</string>
     <string name="settings_fetch_models_failed">No se pudieron obtener los modelos. Revisa la dirección y la clave API.</string>
-    <string name="dashboard_service_killed_title">SwiftSlate se interrumpió</string>
+    <string name="dashboard_service_killed_title">Mystx se interrumpió</string>
     <string name="dashboard_service_killed_message">El servicio en segundo plano se detuvo inesperadamente. Vuelve a activarlo en los ajustes de accesibilidad para seguir usando comandos.</string>
     <string name="dashboard_service_killed_dismiss">Descartar</string>
 </resources>

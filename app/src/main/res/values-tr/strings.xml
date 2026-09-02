@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">SwiftSlate</string>
-    <string name="accessibility_service_label">SwiftSlate Asistanı</string>
+    <string name="app_name">Mystx</string>
+    <string name="accessibility_service_label">Mystx Asistanı</string>
     <string name="accessibility_service_desc">Tetikleyici komutlar yazıldığında sistem genelinde AI tabanlı metin değiştirmeleri sağlar.</string>
 
     <!-- Dashboard -->
@@ -54,6 +54,7 @@
     <string name="settings_provider_title">Model Sağlayıcısı</string>
     <string name="settings_provider_gemini">Google Gemini</string>
     <string name="settings_provider_groq">Groq</string>
+    <string name="settings_provider_bai">B.ai</string>
     <string name="settings_provider_custom">Özel (OpenAI Uyumlu)</string>
     <string name="settings_model_title">Model</string>
     <string name="settings_temperature_title">Sıcaklık</string>
@@ -106,7 +107,7 @@
     <string name="process_text_retry">Tekrar dene</string>
     <string name="process_text_copied">Kopyalandı</string>
     <string name="process_text_no_selection">Metin seçilmedi</string>
-    <string name="process_text_no_commands">Kullanılabilir komut yok. SwiftSlate\'e bir komut ekleyin.</string>
+    <string name="process_text_no_commands">Kullanılabilir komut yok. Mystx\'e bir komut ekleyin.</string>
     <string name="toast_restore_failed">Orijinal metin geri yüklenemedi</string>
     <string name="toast_nothing_to_undo">Geri alınacak bir şey yok</string>
     <string name="toast_undo_failed">Geri alınamadı</string>
@@ -130,8 +131,8 @@
 
     <!-- Updates &amp; command descriptions -->
     <string name="update_channel_name">Uygulama Güncellemeleri</string>
-    <string name="update_channel_desc">SwiftSlate\'in yeni bir sürümü kullanıma sunulduğunda bildirir</string>
-    <string name="update_available_title">SwiftSlate güncellemesi mevcut</string>
+    <string name="update_channel_desc">Mystx\'in yeni bir sürümü kullanıma sunulduğunda bildirir</string>
+    <string name="update_available_title">Mystx güncellemesi mevcut</string>
     <string name="update_available_text">En son sürümü görüntülemek için dokunun</string>
     <string name="error_input_too_long">Metin, bu modelin dakika başına token sınırı için çok uzun. Daha kısa bir metinle tekrar deneyin.</string>
     <string name="note_response_truncated">[Not: yanıt kesilmiş olabilir]</string>
@@ -142,7 +143,7 @@
     <string name="settings_fetch_models_success">%1$d model yüklendi</string>
     <string name="settings_fetch_models_empty">Model bulunamadı. Yine de manuel olarak model girebilirsiniz.</string>
     <string name="settings_fetch_models_failed">Modeller getirilemedi. Adresi ve API anahtarını kontrol edin.</string>
-    <string name="dashboard_service_killed_title">SwiftSlate kesintiye uğradı</string>
+    <string name="dashboard_service_killed_title">Mystx kesintiye uğradı</string>
     <string name="dashboard_service_killed_message">Arka plan hizmeti beklenmedik şekilde durdu. Komutları kullanmaya devam etmek için erişilebilirlik ayarlarından yeniden etkinleştirin.</string>
     <string name="dashboard_service_killed_dismiss">Kapat</string>
 </resources>

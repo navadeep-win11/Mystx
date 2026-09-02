@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">SwiftSlate</string>
-    <string name="accessibility_service_label">SwiftSlate asistentas</string>
+    <string name="app_name">Mystx</string>
+    <string name="accessibility_service_label">Mystx asistentas</string>
     <string name="accessibility_service_desc">Teikia visos sistemos dirbtinio intelekto teksto pakeitimus, kai įvedamos aktyvinimo komandos.</string>
 
     <!-- Dashboard -->
@@ -54,6 +54,7 @@
     <string name="settings_provider_title">Modelio tiekėjas</string>
     <string name="settings_provider_gemini">Google Gemini</string>
     <string name="settings_provider_groq">Groq</string>
+    <string name="settings_provider_bai">B.ai</string>
     <string name="settings_provider_custom">Pasirinktinis (suderinamas su OpenAI)</string>
     <string name="settings_model_title">Modelis</string>
     <string name="settings_temperature_title">Temperatūra</string>
@@ -106,7 +107,7 @@
     <string name="process_text_retry">Bandyti dar kartą</string>
     <string name="process_text_copied">Nukopijuota</string>
     <string name="process_text_no_selection">Nepasirinktas tekstas</string>
-    <string name="process_text_no_commands">Nėra galimų komandų. Pridėkite komandą programoje „SwiftSlate“.</string>
+    <string name="process_text_no_commands">Nėra galimų komandų. Pridėkite komandą programoje „Mystx“.</string>
     <string name="toast_restore_failed">Nepavyko atkurti pradinio teksto</string>
     <string name="toast_nothing_to_undo">Nėra ką anuliuoti</string>
     <string name="toast_undo_failed">Nepavyko anuliuoti</string>
@@ -130,8 +131,8 @@
 
     <!-- Update notifications -->
     <string name="update_channel_name">Programos naujiniai</string>
-    <string name="update_channel_desc">Praneša, kai yra nauja SwiftSlate versija</string>
-    <string name="update_available_title">Yra SwiftSlate naujinys</string>
+    <string name="update_channel_desc">Praneša, kai yra nauja Mystx versija</string>
+    <string name="update_available_title">Yra Mystx naujinys</string>
     <string name="update_available_text">Palieskite, kad peržiūrėtumėte naujausią leidimą</string>
     <string name="error_input_too_long">Tekstas per ilgas šio modelio žetonų per minutę ribai. Bandykite dar kartą su trumpesniu tekstu.</string>
     <string name="note_response_truncated">[Pastaba: atsakymas gali būti nutrūkęs]</string>
@@ -142,7 +143,7 @@
     <string name="settings_fetch_models_success">Įkelta modelių: %1$d</string>
     <string name="settings_fetch_models_empty">Modelių nerasta. Modelį vis tiek galite įvesti rankiniu būdu.</string>
     <string name="settings_fetch_models_failed">Nepavyko gauti modelių. Patikrinkite adresą ir API raktą.</string>
-    <string name="dashboard_service_killed_title">SwiftSlate buvo nutraukta</string>
+    <string name="dashboard_service_killed_title">Mystx buvo nutraukta</string>
     <string name="dashboard_service_killed_message">Foninė tarnyba netikėtai sustojo. Iš naujo įjunkite ją pritaikymo neįgaliesiems nustatymuose, kad galėtumėte toliau naudoti komandas.</string>
     <string name="dashboard_service_killed_dismiss">Uždaryti</string>
 </resources>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">SwiftSlate</string>
-    <string name="accessibility_service_label">ผู้ช่วย SwiftSlate</string>
+    <string name="app_name">Mystx</string>
+    <string name="accessibility_service_label">ผู้ช่วย Mystx</string>
     <string name="accessibility_service_desc">ให้การแทนที่ข้อความด้วย AI ทั่วทั้งระบบเมื่อพิมพ์คำสั่งทริกเกอร์</string>
 
     <!-- Dashboard -->
@@ -54,6 +54,7 @@
     <string name="settings_provider_title">ผู้ให้บริการโมเดล</string>
     <string name="settings_provider_gemini">Google Gemini</string>
     <string name="settings_provider_groq">Groq</string>
+    <string name="settings_provider_bai">B.ai</string>
     <string name="settings_provider_custom">กำหนดเอง (เข้ากันได้กับ OpenAI)</string>
     <string name="settings_model_title">โมเดล</string>
     <string name="settings_temperature_title">อุณหภูมิ</string>
@@ -106,7 +107,7 @@
     <string name="process_text_retry">ลองอีกครั้ง</string>
     <string name="process_text_copied">คัดลอกแล้ว</string>
     <string name="process_text_no_selection">ไม่ได้เลือกข้อความ</string>
-    <string name="process_text_no_commands">ไม่มีคำสั่งที่ใช้ได้ เพิ่มคำสั่งใน SwiftSlate</string>
+    <string name="process_text_no_commands">ไม่มีคำสั่งที่ใช้ได้ เพิ่มคำสั่งใน Mystx</string>
     <string name="toast_restore_failed">ไม่สามารถกู้คืนข้อความต้นฉบับได้</string>
     <string name="toast_nothing_to_undo">ไม่มีสิ่งที่จะเลิกทำ</string>
     <string name="toast_undo_failed">ไม่สามารถเลิกทำได้</string>
@@ -130,8 +131,8 @@
 
     <!-- Updates &amp; command descriptions -->
     <string name="update_channel_name">อัปเดตแอป</string>
-    <string name="update_channel_desc">แจ้งเตือนเมื่อมี SwiftSlate เวอร์ชันใหม่</string>
-    <string name="update_available_title">มีอัปเดต SwiftSlate</string>
+    <string name="update_channel_desc">แจ้งเตือนเมื่อมี Mystx เวอร์ชันใหม่</string>
+    <string name="update_available_title">มีอัปเดต Mystx</string>
     <string name="update_available_text">แตะเพื่อดูรุ่นล่าสุด</string>
     <string name="error_input_too_long">ข้อความยาวเกินขีดจำกัดโทเค็นต่อนาทีของโมเดลนี้ ลองอีกครั้งด้วยข้อความที่สั้นลง</string>
     <string name="note_response_truncated">[หมายเหตุ: คำตอบอาจถูกตัดจบ]</string>
@@ -142,7 +143,7 @@
     <string name="settings_fetch_models_success">โหลดแล้ว %1$d โมเดล</string>
     <string name="settings_fetch_models_empty">ไม่พบโมเดล คุณยังป้อนชื่อโมเดลด้วยตนเองได้</string>
     <string name="settings_fetch_models_failed">ไม่สามารถดึงรายชื่อโมเดลได้ ตรวจสอบที่อยู่และคีย์ API</string>
-    <string name="dashboard_service_killed_title">SwiftSlate ถูกขัดจังหวะ</string>
+    <string name="dashboard_service_killed_title">Mystx ถูกขัดจังหวะ</string>
     <string name="dashboard_service_killed_message">บริการพื้นหลังหยุดทำงานโดยไม่คาดคิด เปิดใช้งานอีกครั้งในการตั้งค่าการเข้าถึงเพื่อใช้คำสั่งต่อไป</string>
     <string name="dashboard_service_killed_dismiss">ปิด</string>
 </resources>

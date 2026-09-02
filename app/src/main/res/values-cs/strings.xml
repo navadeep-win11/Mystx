@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">SwiftSlate</string>
-    <string name="accessibility_service_label">Asistent SwiftSlate</string>
+    <string name="app_name">Mystx</string>
+    <string name="accessibility_service_label">Asistent Mystx</string>
     <string name="accessibility_service_desc">Poskytuje systémové náhrady textu pomocí AI, když zadáte spouštěcí příkazy.</string>
 
     <!-- Dashboard -->
@@ -54,6 +54,7 @@
     <string name="settings_provider_title">Poskytovatel modelu</string>
     <string name="settings_provider_gemini">Google Gemini</string>
     <string name="settings_provider_groq">Groq</string>
+    <string name="settings_provider_bai">B.ai</string>
     <string name="settings_provider_custom">Vlastní (kompatibilní s OpenAI)</string>
     <string name="settings_model_title">Model</string>
     <string name="settings_temperature_title">Teplota</string>
@@ -106,7 +107,7 @@
     <string name="process_text_retry">Zkusit znovu</string>
     <string name="process_text_copied">Zkopírováno</string>
     <string name="process_text_no_selection">Není vybrán žádný text</string>
-    <string name="process_text_no_commands">Nejsou k dispozici žádné příkazy. Přidejte jeden ve SwiftSlate.</string>
+    <string name="process_text_no_commands">Nejsou k dispozici žádné příkazy. Přidejte jeden ve Mystx.</string>
     <string name="toast_restore_failed">Původní text se nepodařilo obnovit</string>
     <string name="toast_nothing_to_undo">Není co vrátit zpět</string>
     <string name="toast_undo_failed">Nepodařilo se vrátit zpět</string>
@@ -130,8 +131,8 @@
 
     <!-- Updates -->
     <string name="update_channel_name">Aktualizace aplikace</string>
-    <string name="update_channel_desc">Upozorní, když je k dispozici nová verze SwiftSlate</string>
-    <string name="update_available_title">K dispozici je aktualizace SwiftSlate</string>
+    <string name="update_channel_desc">Upozorní, když je k dispozici nová verze Mystx</string>
+    <string name="update_available_title">K dispozici je aktualizace Mystx</string>
     <string name="update_available_text">Klepnutím zobrazíte nejnovější verzi</string>
 
     <!-- Command descriptions -->
@@ -144,7 +145,7 @@
     <string name="settings_fetch_models_success">Načteno modelů: %1$d</string>
     <string name="settings_fetch_models_empty">Nebyly nalezeny žádné modely. Model můžete zadat ručně.</string>
     <string name="settings_fetch_models_failed">Modely nelze načíst. Zkontrolujte adresu a klíč API.</string>
-    <string name="dashboard_service_killed_title">Aplikace SwiftSlate byla přerušena</string>
+    <string name="dashboard_service_killed_title">Aplikace Mystx byla přerušena</string>
     <string name="dashboard_service_killed_message">Služba na pozadí se neočekávaně zastavila. Znovu ji povolte v nastavení usnadnění, abyste mohli dál používat příkazy.</string>
     <string name="dashboard_service_killed_dismiss">Zavřít</string>
 </resources>

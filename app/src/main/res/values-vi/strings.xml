@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">SwiftSlate</string>
-    <string name="accessibility_service_label">Trợ lý SwiftSlate</string>
+    <string name="app_name">Mystx</string>
+    <string name="accessibility_service_label">Trợ lý Mystx</string>
     <string name="accessibility_service_desc">Cung cấp thay thế văn bản bằng AI trên toàn hệ thống khi nhập lệnh kích hoạt.</string>
 
     <!-- Dashboard -->
@@ -54,6 +54,7 @@
     <string name="settings_provider_title">Nhà cung cấp mô hình</string>
     <string name="settings_provider_gemini">Google Gemini</string>
     <string name="settings_provider_groq">Groq</string>
+    <string name="settings_provider_bai">B.ai</string>
     <string name="settings_provider_custom">Tùy chỉnh (tương thích OpenAI)</string>
     <string name="settings_model_title">Mô hình</string>
     <string name="settings_temperature_title">Nhiệt độ</string>
@@ -106,7 +107,7 @@
     <string name="process_text_retry">Thử lại</string>
     <string name="process_text_copied">Đã sao chép</string>
     <string name="process_text_no_selection">Chưa chọn văn bản</string>
-    <string name="process_text_no_commands">Không có lệnh nào. Hãy thêm một lệnh trong SwiftSlate.</string>
+    <string name="process_text_no_commands">Không có lệnh nào. Hãy thêm một lệnh trong Mystx.</string>
     <string name="toast_restore_failed">Không thể khôi phục văn bản gốc</string>
     <string name="toast_nothing_to_undo">Không có gì để hoàn tác</string>
     <string name="toast_undo_failed">Không thể hoàn tác</string>
@@ -130,8 +131,8 @@
 
     <!-- Updates &amp; command descriptions -->
     <string name="update_channel_name">Cập nhật ứng dụng</string>
-    <string name="update_channel_desc">Thông báo khi có phiên bản SwiftSlate mới</string>
-    <string name="update_available_title">Đã có bản cập nhật SwiftSlate</string>
+    <string name="update_channel_desc">Thông báo khi có phiên bản Mystx mới</string>
+    <string name="update_available_title">Đã có bản cập nhật Mystx</string>
     <string name="update_available_text">Nhấn để xem bản phát hành mới nhất</string>
     <string name="error_input_too_long">Văn bản quá dài so với giới hạn token mỗi phút của mô hình này. Hãy thử lại với văn bản ngắn hơn.</string>
     <string name="note_response_truncated">[Lưu ý: phản hồi có thể bị cắt]</string>
@@ -142,7 +143,7 @@
     <string name="settings_fetch_models_success">Đã tải %1$d mô hình</string>
     <string name="settings_fetch_models_empty">Không tìm thấy mô hình nào. Bạn vẫn có thể nhập tên mô hình theo cách thủ công.</string>
     <string name="settings_fetch_models_failed">Không thể lấy danh sách mô hình. Kiểm tra địa chỉ và khóa API.</string>
-    <string name="dashboard_service_killed_title">SwiftSlate đã bị gián đoạn</string>
+    <string name="dashboard_service_killed_title">Mystx đã bị gián đoạn</string>
     <string name="dashboard_service_killed_message">Dịch vụ nền đã dừng bất ngờ. Hãy bật lại trong cài đặt trợ năng để tiếp tục sử dụng lệnh.</string>
     <string name="dashboard_service_killed_dismiss">Bỏ qua</string>
 </resources>
