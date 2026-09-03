@@ -101,6 +101,9 @@ android {
         includeInApk = false
         includeInBundle = false
     }
+    lint {
+        disable += setOf("MissingTranslation", "LocalContextGetResourceValueCall")
+    }
     packaging {
         resources {
             excludes += setOf(

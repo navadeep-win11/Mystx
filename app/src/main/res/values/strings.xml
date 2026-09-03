@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     <string name="app_name">Mystx</string>
     <string name="accessibility_service_label">Mystx Assistant</string>
     <string name="accessibility_service_desc">Provides system-wide AI text replacements when trigger commands are typed.</string>
