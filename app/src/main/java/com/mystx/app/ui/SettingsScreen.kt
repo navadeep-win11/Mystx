@@ -49,9 +49,18 @@ import com.mystx.app.ui.components.MystCard
 import com.mystx.app.ui.components.MystDivider
 import com.mystx.app.ui.components.MystTextField
 
+import androidx.compose.ui.draw.clip
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(commandManager: CommandManager, prefs: SharedPreferences, keyManager: KeyManager) {
+fun SettingsScreen(
+    commandManager: CommandManager,
+    prefs: SharedPreferences,
+    keyManager: KeyManager,
+    onNavigateToCommandStudio: () -> Unit = {}
+) {
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
     val uriHandler = LocalUriHandler.current
@@ -192,6 +201,52 @@ fun SettingsScreen(commandManager: CommandManager, prefs: SharedPreferences, key
             .padding(horizontal = 20.dp).padding(top = 16.dp).padding(bottom = 112.dp)
     ) {
         ScreenTitle(stringResource(R.string.settings_title))
+
+        // Command Studio Entry Card
+        MystCard(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onNavigateToCommandStudio()
+                }
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(R.string.command_studio_title),
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = stringResource(R.string.command_studio_desc),
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.List,
+                        contentDescription = stringResource(R.string.command_studio_title),
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
 
         // Card 1: Provider + Model
         MystCard {

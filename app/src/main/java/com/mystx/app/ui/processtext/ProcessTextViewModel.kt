@@ -9,9 +9,13 @@ import com.mystx.app.MystxApp
 import com.mystx.app.api.GeminiClient
 import com.mystx.app.api.OpenAICompatibleClient
 import com.mystx.app.manager.CommandManager
+import com.mystx.app.manager.CommandStudioStore
+import com.mystx.app.manager.KeyManager
 import com.mystx.app.manager.StatsManager
 import com.mystx.app.model.Command
 import com.mystx.app.model.CommandType
+import com.mystx.app.model.PromptPlaceholders
+import com.mystx.app.model.RichCommand
 import com.mystx.app.service.CommandOutcome
 import com.mystx.app.service.runTextCommand
 import java.util.concurrent.atomic.AtomicBoolean
@@ -59,6 +63,7 @@ class ProcessTextViewModel(
     // service, or this flow re-tries keys that one already knows are rate-limited or invalid.
     private val keyManager by lazy { (app as MystxApp).keyManager }
     private val commandManager by lazy { CommandManager(app) }
+    private val commandStudioStore by lazy { CommandStudioStore(app, commandManager) }
     private val statsManager by lazy { StatsManager(app) }
     private val geminiClient by lazy { GeminiClient() }
     private val openAIClient by lazy { OpenAICompatibleClient() }
@@ -85,7 +90,10 @@ class ProcessTextViewModel(
                     // accessibility service has and this flow does not. Filtered on isBuiltIn, not
                     // on trigger text: the prefix is user-configurable, so matching "?copy" would
                     // silently stop filtering the moment someone changed it.
-                    commandManager.getCommands().filterNot { it.isBuiltIn }
+                    commandStudioStore.getRichCommands()
+                        .filter { it.enabled }
+                        .filterNot { it.isBuiltIn && (it.trigger.endsWith("undo") || it.trigger.endsWith("copy") || it.trigger.endsWith("cut") || it.trigger.endsWith("paste") || it.trigger.endsWith("replace")) }
+                        .map { Command(it.trigger, it.promptTemplate, it.isBuiltIn, it.type) }
                 }
             } catch (e: Exception) {
                 // This activity shares the process with the accessibility service — an
@@ -101,12 +109,14 @@ class ProcessTextViewModel(
     fun run(command: Command) {
         if (!inFlight.compareAndSet(false, true)) return
 
+        val richCommand = commandStudioStore.getRichForCommand(command)
+
         // A snippet needs no request at all — resolve it without touching the network.
-        if (command.type == CommandType.TEXT_REPLACER) {
+        if (richCommand.type == CommandType.TEXT_REPLACER) {
             inFlight.set(false)
-            _uiState.value = UiState.Preview(command.prompt, canInsert = !selection.readOnly)
+            _uiState.value = UiState.Preview(richCommand.promptTemplate, canInsert = !selection.readOnly)
             viewModelScope.launch {
-                try { withContext(Dispatchers.IO) { statsManager.recordUsage(command.trigger) } }
+                try { withContext(Dispatchers.IO) { statsManager.recordUsage(richCommand.trigger) } }
                 catch (e: Exception) { Log.w(TAG, "recording usage failed", e) }
             }
             return
@@ -115,19 +125,27 @@ class ProcessTextViewModel(
         _uiState.value = UiState.Loading(command)
         viewModelScope.launch {
             _uiState.value = try {
+                val context = PromptPlaceholders.Context(
+                    text = selection.text,
+                    language = PromptPlaceholders.languageFromTrigger(richCommand.trigger)
+                )
+                val finalPrompt = PromptPlaceholders.render(richCommand.promptTemplate, context)
+
                 // On IO: KeyManager is Keystore-backed and prefs are disk-backed, both read on
                 // whatever dispatcher calls them (the HTTP clients switch to IO themselves).
                 val outcome = withTimeout(REQUEST_TIMEOUT_MS) {
                     withContext(Dispatchers.IO) {
                         runTextCommand(
                             getApplication<Application>(), keyManager, geminiClient, openAIClient,
-                            command.prompt, selection.text
+                            finalPrompt, selection.text,
+                            modelOverride = richCommand.modelOverride,
+                            temperatureOverride = richCommand.temperature
                         )
                     }
                 }
                 when (outcome) {
                     is CommandOutcome.Success -> {
-                        try { withContext(Dispatchers.IO) { statsManager.recordUsage(command.trigger) } }
+                        try { withContext(Dispatchers.IO) { statsManager.recordUsage(richCommand.trigger) } }
                         catch (e: Exception) { Log.w(TAG, "recording usage failed", e) }
                         UiState.Preview(outcome.text, canInsert = !selection.readOnly)
                     }

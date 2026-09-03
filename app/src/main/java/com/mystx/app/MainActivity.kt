@@ -48,10 +48,16 @@ import com.mystx.app.ui.KeysScreen
 import com.mystx.app.ui.SettingsScreen
 import com.mystx.app.ui.theme.MystxTheme
 
+import androidx.activity.compose.BackHandler
+import com.mystx.app.model.PrefKeys
+import com.mystx.app.model.RichCommand
+import com.mystx.app.ui.studio.CommandEditorScreen
+import com.mystx.app.ui.studio.CommandStudioScreen
+
 enum class Tab(@param:StringRes val titleRes: Int, val icon: ImageVector) {
     Dashboard(R.string.dashboard_title, Icons.Default.Home),
     Keys(R.string.keys_title, Icons.Default.Lock),
-    Commands(R.string.commands_title, Icons.AutoMirrored.Filled.List),
+    Commands(R.string.command_studio_title, Icons.AutoMirrored.Filled.List),
     Settings(R.string.settings_title, Icons.Default.Settings)
 }
 
@@ -72,6 +78,26 @@ fun MystxMainScreen(vm: MystxViewModel = viewModel()) {
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
     var selectedTab by rememberSaveable { mutableStateOf(Tab.Dashboard) }
+
+    var studioSubScreen by rememberSaveable { mutableStateOf<String?>(null) }
+    var editingCommand by remember { mutableStateOf<RichCommand?>(null) }
+
+    val isEditing = editingCommand != null || studioSubScreen?.startsWith("editor") == true
+
+    BackHandler(enabled = studioSubScreen != null || (selectedTab == Tab.Commands && isEditing)) {
+        if (isEditing) {
+            editingCommand = null
+            if (selectedTab == Tab.Settings) {
+                studioSubScreen = "studio_from_settings"
+            } else {
+                studioSubScreen = null
+            }
+        } else if (studioSubScreen == "studio_from_settings") {
+            studioSubScreen = null
+        } else if (selectedTab == Tab.Commands) {
+            selectedTab = Tab.Dashboard
+        }
+    }
 
     // Request notification permission on first launch (Android 13+)
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -102,46 +128,94 @@ fun MystxMainScreen(vm: MystxViewModel = viewModel()) {
             containerColor = Color.Transparent,
             contentWindowInsets = WindowInsets(0.dp)
         ) { innerPadding ->
-            val screens = remember {
-                Tab.entries.associateWith { tab ->
-                    movableContentOf {
-                        when (tab) {
-                            Tab.Dashboard -> DashboardScreen(vm.keyManager, vm.commandManager, vm.statsManager)
-                            Tab.Keys -> KeysScreen(vm.keyManager, vm.prefs)
-                            Tab.Commands -> CommandsScreen(vm.commandManager)
-                            Tab.Settings -> SettingsScreen(vm.commandManager, vm.prefs, vm.keyManager)
-                        }
+            Box(
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .statusBarsPadding()
+            ) {
+                when {
+                    isEditing -> {
+                        CommandEditorScreen(
+                            initialCommand = editingCommand,
+                            store = vm.commandStudioStore,
+                            keyManager = vm.keyManager,
+                            geminiClient = vm.geminiClient,
+                            openAIClient = vm.openAIClient,
+                            prefs = vm.prefs,
+                            onBack = {
+                                editingCommand = null
+                                if (selectedTab == Tab.Settings) {
+                                    studioSubScreen = "studio_from_settings"
+                                } else {
+                                    studioSubScreen = null
+                                }
+                            }
+                        )
+                    }
+                    selectedTab == Tab.Settings && studioSubScreen == "studio_from_settings" -> {
+                        CommandStudioScreen(
+                            store = vm.commandStudioStore,
+                            globalTemperature = vm.prefs.getFloat(PrefKeys.TEMPERATURE, 0.5f),
+                            onEditCommand = { cmd ->
+                                editingCommand = cmd
+                                studioSubScreen = "editor_${cmd.id}"
+                            },
+                            onCreateCommand = {
+                                editingCommand = null
+                                studioSubScreen = "editor_new"
+                            },
+                            onBack = { studioSubScreen = null }
+                        )
+                    }
+                    selectedTab == Tab.Commands -> {
+                        CommandStudioScreen(
+                            store = vm.commandStudioStore,
+                            globalTemperature = vm.prefs.getFloat(PrefKeys.TEMPERATURE, 0.5f),
+                            onEditCommand = { cmd ->
+                                editingCommand = cmd
+                                studioSubScreen = "editor_${cmd.id}"
+                            },
+                            onCreateCommand = {
+                                editingCommand = null
+                                studioSubScreen = "editor_new"
+                            },
+                            onBack = { selectedTab = Tab.Dashboard }
+                        )
+                    }
+                    selectedTab == Tab.Dashboard -> {
+                        DashboardScreen(vm.keyManager, vm.commandManager, vm.statsManager)
+                    }
+                    selectedTab == Tab.Keys -> {
+                        KeysScreen(vm.keyManager, vm.prefs)
+                    }
+                    selectedTab == Tab.Settings -> {
+                        SettingsScreen(
+                            commandManager = vm.commandManager,
+                            prefs = vm.prefs,
+                            keyManager = vm.keyManager,
+                            onNavigateToCommandStudio = { studioSubScreen = "studio_from_settings" }
+                        )
                     }
                 }
-            }
-
-            AnimatedContent(
-                targetState = selectedTab,
-                modifier = Modifier.padding(innerPadding).statusBarsPadding(),
-                transitionSpec = {
-                    val direction = if (targetState.ordinal > initialState.ordinal)
-                        AnimatedContentTransitionScope.SlideDirection.Left
-                    else
-                        AnimatedContentTransitionScope.SlideDirection.Right
-                    slideIntoContainer(direction, tween(280, easing = FastOutSlowInEasing)) togetherWith
-                        slideOutOfContainer(direction, tween(280, easing = FastOutSlowInEasing))
-                },
-                label = "tab_transition"
-            ) { tab ->
-                screens[tab]?.invoke()
             }
         }
 
         // Floating glass dock — hovers over the content, centered, above the nav bar inset.
-        MystDock(
-            items = Tab.entries.map { MystDockItem(icon = it.icon, labelRes = it.titleRes) },
-            selected = selectedTab.ordinal,
-            onSelect = { index -> selectedTab = Tab.entries[index] },
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .navigationBarsPadding()
-                .padding(bottom = 14.dp)
-                .widthIn(max = 420.dp)
-        )
+        if (!isEditing) {
+            MystDock(
+                items = Tab.entries.map { MystDockItem(icon = it.icon, labelRes = it.titleRes) },
+                selected = selectedTab.ordinal,
+                onSelect = { index ->
+                    studioSubScreen = null
+                    editingCommand = null
+                    selectedTab = Tab.entries[index]
+                },
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .navigationBarsPadding()
+                    .padding(bottom = 14.dp)
+                    .widthIn(max = 420.dp)
+            )
+        }
     }
 }

@@ -19,10 +19,13 @@ import android.view.accessibility.AccessibilityNodeInfo
 import com.mystx.app.api.GeminiClient
 import com.mystx.app.api.OpenAICompatibleClient
 import com.mystx.app.manager.CommandManager
+import com.mystx.app.manager.CommandStudioStore
 import com.mystx.app.manager.KeyManager
 import com.mystx.app.manager.StatsManager
 import com.mystx.app.model.Command
 import com.mystx.app.model.CommandType
+import com.mystx.app.model.PromptPlaceholders
+import com.mystx.app.model.RichCommand
 import com.mystx.app.ui.processtext.ProcessTextEdit
 import com.mystx.app.ui.processtext.ProcessTextReplacementBridge
 import com.mystx.app.ui.processtext.resolveProcessTextEdit
@@ -49,6 +52,7 @@ class AssistantService : AccessibilityService() {
 
     private lateinit var keyManager: KeyManager
     private lateinit var commandManager: CommandManager
+    private lateinit var commandStudioStore: CommandStudioStore
     private lateinit var statsManager: StatsManager
     private val client = GeminiClient()
     private val openAIClient = OpenAICompatibleClient()
@@ -121,6 +125,7 @@ class AssistantService : AccessibilityService() {
         try {
             keyManager = (applicationContext as MystxApp).keyManager
             commandManager = CommandManager(applicationContext)
+            commandStudioStore = CommandStudioStore(applicationContext, commandManager)
             statsManager = StatsManager(applicationContext)
             updateTriggers()
         } catch (e: Exception) {
@@ -255,10 +260,16 @@ class AssistantService : AccessibilityService() {
             return
         }
 
-        val precedingText = text.substring(0, text.length - command.trigger.length)
+        val richCommand = commandStudioStore.getRichForCommand(command)
+        if (!richCommand.enabled) {
+            source.safeRecycle()
+            return
+        }
+
+        val precedingText = text.substring(0, text.length - richCommand.trigger.length)
         val cleanText = precedingText.trim()
 
-        if (command.trigger.endsWith("undo") && command.isBuiltIn) {
+        if (richCommand.trigger.endsWith("undo") && richCommand.isBuiltIn) {
             if (!isProcessing.compareAndSet(false, true)) {
                 source.safeRecycle()
                 return
@@ -270,8 +281,8 @@ class AssistantService : AccessibilityService() {
             return
         }
 
-        if (command.isBuiltIn && (command.trigger.endsWith("copy") || command.trigger.endsWith("cut") ||
-            command.trigger.endsWith("paste") || command.trigger.endsWith("replace"))) {
+        if (richCommand.isBuiltIn && (richCommand.trigger.endsWith("copy") || richCommand.trigger.endsWith("cut") ||
+            richCommand.trigger.endsWith("paste") || richCommand.trigger.endsWith("replace"))) {
             if (!isProcessing.compareAndSet(false, true)) {
                 source.safeRecycle()
                 return
@@ -283,7 +294,7 @@ class AssistantService : AccessibilityService() {
             return
         }
 
-        when (command.type) {
+        when (richCommand.type) {
             CommandType.TEXT_REPLACER -> {
                 if (!isProcessing.compareAndSet(false, true)) {
                     source.safeRecycle()
@@ -296,7 +307,7 @@ class AssistantService : AccessibilityService() {
                     val thisJob = coroutineContext[Job]
                     try {
                         withContext(Dispatchers.Main) {
-                            val replacerOk = replaceText(source, precedingText + command.prompt)
+                            val replacerOk = replaceText(source, precedingText + richCommand.promptTemplate)
                             if (!replacerOk) {
                                 // Don't record an undo point, a CONFIRM haptic or a usage stat
                                 // for a replacement the field silently refused.
@@ -306,7 +317,7 @@ class AssistantService : AccessibilityService() {
                                 lastOriginalText = precedingText
                                 lastUndoSourceId = sourceId(source)
                                 performHapticFeedback(HapticFeedbackConstants.CONFIRM)
-                                statsManager.recordUsage(command.trigger)
+                                statsManager.recordUsage(richCommand.trigger)
                             }
                         }
                     } catch (e: CancellationException) {
@@ -321,8 +332,8 @@ class AssistantService : AccessibilityService() {
                                 cancelWatchdog()
                                 scheduleProcessingReset()
                             }
-                            recycleIfUnowned(source)
                         }
+                        recycleIfUnowned(source)
                     }
                 }
             }
@@ -338,7 +349,7 @@ class AssistantService : AccessibilityService() {
                 startWatchdog()
                 cancelPendingProcessingReset()
                 currentJob?.cancel()
-                processCommand(source, cleanText, command)
+                processCommand(source, cleanText, richCommand)
             }
         }
     }
@@ -467,7 +478,7 @@ class AssistantService : AccessibilityService() {
         return true
     }
 
-    private fun processCommand(source: AccessibilityNodeInfo, text: String, command: Command) {
+    private fun processCommand(source: AccessibilityNodeInfo, text: String, command: RichCommand) {
         if (!keyManager.keystoreAvailable) {
             // keys_keystore_error rather than toast_keystore_unavailable: the latter tells the
             // user to reinstall, which destroys every key, command and setting, and does not
@@ -485,10 +496,23 @@ class AssistantService : AccessibilityService() {
             val originalText = text
             var spinnerJob: Job? = null
             try {
+                val lang = PromptPlaceholders.languageFromTrigger(command.trigger)
+                val appPackage = source.packageName?.toString()
+                val placeholderContext = PromptPlaceholders.Context(
+                    text = text,
+                    language = lang,
+                    tone = null,
+                    instruction = null,
+                    app = appPackage
+                )
+                val finalPrompt = PromptPlaceholders.render(command.promptTemplate, placeholderContext)
+
                 val outcome = withTimeout(90_000) {
                     runTextCommand(
                         applicationContext, keyManager, client, openAIClient,
-                        command.prompt, text
+                        finalPrompt, text,
+                        modelOverride = command.modelOverride,
+                        temperatureOverride = command.temperature
                     ) { spinnerJob = startInlineSpinner(source, originalText) }
                 }
                 // From the first attempt onward the field holds the spinner glyph instead of the

@@ -152,4 +152,45 @@
     <string name="dashboard_service_killed_title">Mystx was interrupted</string>
     <string name="dashboard_service_killed_message">The background service stopped unexpectedly. Re-enable it in accessibility settings to keep using commands.</string>
     <string name="dashboard_service_killed_dismiss">Dismiss</string>
+
+    <!-- Command Studio -->
+    <string name="command_studio_title">Command Studio</string>
+    <string name="command_studio_desc">Manage prompt templates, per-command models, triggers &amp; variables</string>
+    <string name="command_studio_search_hint">Search commands…</string>
+    <string name="command_studio_new_command">+ New Command</string>
+    <string name="command_studio_edit_command">Edit Command</string>
+    <string name="command_studio_create_title">New Command</string>
+    <string name="command_studio_name_label">Command Name</string>
+    <string name="command_studio_name_hint">e.g. Fix Grammar</string>
+    <string name="command_studio_trigger_label">Trigger (e.g. %1$sfix)</string>
+    <string name="command_studio_category_label">Category</string>
+    <string name="command_studio_model_label">Model</string>
+    <string name="command_studio_model_global">Use Global Model</string>
+    <string name="command_studio_temperature_label">Temperature</string>
+    <string name="command_studio_prompt_label">Prompt Template</string>
+    <string name="command_studio_prompt_hint">Write instructions… Use {text} where input belongs</string>
+    <string name="command_studio_insert_variable">Insert variable</string>
+    <string name="command_studio_enabled_label">Enabled</string>
+    <string name="command_studio_save">Save Command</string>
+    <string name="command_studio_delete">Delete</string>
+    <string name="command_studio_reset">Reset to Default</string>
+    <string name="command_studio_test_title">Test Command</string>
+    <string name="command_studio_test_run">Run Test</string>
+    <string name="command_studio_test_preview">Generated Prompt Preview</string>
+    <string name="command_studio_test_input_label">Sample Text</string>
+    <string name="command_studio_test_result_label">Output Preview</string>
+    <string name="command_studio_test_running">Testing command…</string>
+    <string name="command_studio_error_name_empty">Command name cannot be empty</string>
+    <string name="command_studio_error_trigger_empty">Trigger cannot be empty</string>
+    <string name="command_studio_error_trigger_prefix">Trigger must start with \'%1$s\'</string>
+    <string name="command_studio_error_trigger_duplicate">A command with this trigger already exists</string>
+    <string name="command_studio_error_prompt_empty">Prompt template cannot be empty</string>
+    <string name="command_studio_error_missing_text">Prompt template must contain {text}</string>
+    <string name="command_studio_error_temp">Temperature must be between 0.0 and 2.0</string>
+    <string name="command_studio_saved">Command saved successfully</string>
+    <string name="command_studio_delete_confirm_title">Delete this command?</string>
+    <string name="command_studio_delete_confirm_msg">This custom command will be permanently deleted.</string>
+    <string name="command_studio_reset_confirm_title">Reset built-in command?</string>
+    <string name="command_studio_reset_confirm_msg">Revert prompt template, model and settings to default?</string>
+    <string name="command_studio_empty_search">No commands match your filter</string>
 </resources>

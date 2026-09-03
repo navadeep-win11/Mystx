@@ -45,6 +45,8 @@ suspend fun runTextCommand(
     openAIClient: OpenAICompatibleClient,
     prompt: String,
     text: String,
+    modelOverride: String? = null,
+    temperatureOverride: Float? = null,
     onFirstAttempt: () -> Unit = {}
 ): CommandOutcome {
     // keys_keystore_error rather than a "reinstall" message: the usual cause is the Keystore key
@@ -55,12 +57,18 @@ suspend fun runTextCommand(
 
     val prefs = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
     val provider = Providers.forType(prefs.getString(PrefKeys.PROVIDER_TYPE, null))
-    val model = provider.sanitizeModel(prefs.getString(provider.modelPrefKey, provider.defaultModel))
+    val defaultModel = prefs.getString(provider.modelPrefKey, provider.defaultModel)
+    val model = if (!modelOverride.isNullOrBlank() && !modelOverride.equals("Global", ignoreCase = true)) {
+        provider.sanitizeModel(modelOverride)
+    } else {
+        provider.sanitizeModel(defaultModel)
+    }
     val endpoint = provider.resolveEndpoint(prefs.getString(PrefKeys.CUSTOM_ENDPOINT, "") ?: "")
     if (!provider.isConfigured(model, endpoint)) {
         return CommandOutcome.Unavailable(context.getString(R.string.toast_custom_not_configured))
     }
-    val temperature = prefs.getFloat(PrefKeys.TEMPERATURE, DEFAULT_TEMPERATURE).toDouble()
+    val defaultTemp = prefs.getFloat(PrefKeys.TEMPERATURE, DEFAULT_TEMPERATURE)
+    val temperature = (temperatureOverride ?: defaultTemp).toDouble()
     val useStructuredOutput = System.currentTimeMillis() -
         prefs.getLong(PrefKeys.STRUCTURED_OUTPUT_DISABLED_AT, 0L) > STRUCTURED_OUTPUT_RETRY_MS
 
