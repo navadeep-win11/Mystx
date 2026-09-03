@@ -161,7 +161,7 @@ class CommandStudioTest {
     @Test
     fun testModelOverrideResolution() {
         val custom = RichCommand(
-            id = "groqcode",
+            id = "code",
             name = "Coding Model",
             trigger = "?code",
             category = CommandCategory.CODING,
@@ -200,7 +200,7 @@ class CommandStudioTest {
     @Test
     fun testTemperatureConfiguration() {
         val custom = RichCommand(
-            id = "tempcmd",
+            id = "temp",
             name = "Temp Command",
             trigger = "?temp",
             category = CommandCategory.SOCIAL,
@@ -212,14 +212,15 @@ class CommandStudioTest {
         )
         store.saveCustom(custom)
         val fetched = store.getRichCommands().first { it.trigger == "?temp" }
-        assertEquals(1.8f, fetched.temperature)
+        assertNotNull(fetched.temperature)
+        assertEquals(1.8f, fetched.temperature!!, 0.001f)
     }
 
     // 10. Enabled/disabled commands
     @Test
     fun testEnabledDisabledCommands() {
         val custom = RichCommand(
-            id = "togglecmd",
+            id = "toggle",
             name = "Toggle Command",
             trigger = "?toggle",
             category = CommandCategory.CUSTOM,
@@ -232,10 +233,10 @@ class CommandStudioTest {
         store.saveCustom(custom)
         assertTrue(store.getRichCommands().first { it.trigger == "?toggle" }.enabled)
 
-        store.setEnabled("togglecmd", false)
+        store.setEnabled("toggle", false)
         assertFalse(store.getRichCommands().first { it.trigger == "?toggle" }.enabled)
 
-        store.setEnabled("togglecmd", true)
+        store.setEnabled("toggle", true)
         assertTrue(store.getRichCommands().first { it.trigger == "?toggle" }.enabled)
     }
 
@@ -248,7 +249,12 @@ class CommandStudioTest {
         assertEquals("Fix Grammar", fix!!.name)
         assertEquals(CommandCategory.WRITING, fix.category)
         assertTrue(fix.enabled)
-        assertTrue(fix.isBuiltIn)
+        // Default AI commands are editable/customizable, system commands are builtIn
+        assertFalse(fix.isBuiltIn)
+
+        val undo = all.find { it.trigger == "?undo" }
+        assertNotNull(undo)
+        assertTrue(undo!!.isBuiltIn)
 
         // Verify findRich for text containing ?fix
         val matched = store.findRich("Please correct this?fix")
@@ -268,7 +274,7 @@ class CommandStudioTest {
     @Test
     fun testCommandDeletion() {
         val custom = RichCommand(
-            id = "deletecmd",
+            id = "delete",
             name = "Delete Me",
             trigger = "?delete",
             category = CommandCategory.CUSTOM,
@@ -282,7 +288,7 @@ class CommandStudioTest {
         assertNotNull(store.getRichCommands().find { it.trigger == "?delete" })
 
         // Deleting custom command succeeds
-        val deleted = store.deleteCustom("deletecmd")
+        val deleted = store.deleteCustom("delete")
         assertTrue(deleted)
         assertNull(store.getRichCommands().find { it.trigger == "?delete" })
 

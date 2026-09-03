@@ -74,7 +74,8 @@ class CommandStudioStore(
     }
 
     fun saveMeta(command: RichCommand) {
-        prefs.edit().putString(metaKeyFor(command.id), command.toMeta().toJson()).apply()
+        val keyId = RichCommand.keyFor(command.trigger).ifEmpty { command.id }
+        prefs.edit().putString(metaKeyFor(keyId), command.toMeta().toJson()).apply()
     }
 
     fun removeMeta(id: String) {
@@ -97,10 +98,11 @@ class CommandStudioStore(
         val ok = commandManager.saveCustomCommand(stored, replacing)
         if (ok) {
             val oldId = RichCommand.keyFor(replacing)
-            if (oldId.isNotEmpty() && oldId != command.id) {
+            val newId = RichCommand.keyFor(command.trigger)
+            if (oldId.isNotEmpty() && oldId != newId) {
                 removeMeta(oldId)
             }
-            saveMeta(command)
+            saveMeta(command.copy(id = newId))
         }
         return if (ok) command.trigger else null
     }
@@ -109,16 +111,21 @@ class CommandStudioStore(
      * Checks whether a trigger is already taken by another command.
      */
     fun isTriggerTaken(trigger: String, excludingId: String?): Boolean =
-        getRichCommands().any { it.id != excludingId && it.trigger.equals(trigger, ignoreCase = false) }
+        getRichCommands().any {
+            (excludingId == null || (it.id != excludingId && it.trigger != excludingId)) &&
+                it.trigger.equals(trigger, ignoreCase = false)
+        }
 
     /**
      * Deletes a custom command. Built-ins are protected and cannot be deleted.
      */
     fun deleteCustom(id: String): Boolean {
-        val target = getRichCommands().firstOrNull { it.id == id } ?: return false
+        val target = getRichCommands().firstOrNull {
+            it.id == id || it.id == RichCommand.keyFor(id) || it.trigger == id
+        } ?: return false
         if (target.isBuiltIn) return false
         commandManager.removeCustomCommand(target.trigger)
-        removeMeta(id)
+        removeMeta(target.id)
         return true
     }
 
@@ -126,9 +133,11 @@ class CommandStudioStore(
      * Restores a built-in command to its default presentation and behavior.
      */
     fun resetBuiltIn(id: String): Boolean {
-        val target = getRichCommands().firstOrNull { it.id == id } ?: return false
+        val target = getRichCommands().firstOrNull {
+            it.id == id || it.id == RichCommand.keyFor(id) || it.trigger == id
+        } ?: return false
         if (!target.isBuiltIn) return false
-        removeMeta(id)
+        removeMeta(target.id)
         return true
     }
 
@@ -136,7 +145,9 @@ class CommandStudioStore(
      * Toggles whether a command is active.
      */
     fun setEnabled(id: String, enabled: Boolean): Boolean {
-        val target = getRichCommands().firstOrNull { it.id == id } ?: return false
+        val target = getRichCommands().firstOrNull {
+            it.id == id || it.id == RichCommand.keyFor(id) || it.trigger == id
+        } ?: return false
         saveMeta(target.copy(enabled = enabled))
         return true
     }
