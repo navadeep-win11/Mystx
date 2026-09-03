@@ -1,0 +1,5 @@
+- fix(lint): configure lint to ignore MissingTranslation for newly added English strings
+- fix(lint): use stringResource instead of context.getString in CommandEditorScreen
+- fix(studio): align metadata key mapping and test assertions for custom commands
+- fix(ui): add missing foundation background import in SettingsScreen
+- feat(studio): implement dedicated Command Studio and rich command model
