@@ -40,6 +40,7 @@ Type a trigger like **`?fix`** at the end of any text, in any app, and watch it 
 - **Encrypted key storage** — keys live in the Android Keystore, never in plain text.
 - **Backup & restore** — export/import your commands as JSON.
 - **Private by design** — your text goes only to the AI provider you choose. No analytics, no tracking.
+- Glassmorphism interface with Poppins typography — frosted panels over a violet/blue aurora.
 - **43 languages** UI translation.
 
 ## 🚀 Getting Started
