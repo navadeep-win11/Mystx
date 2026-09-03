@@ -1,0 +1,3 @@
+- Fix missing Box import in MainActivity (glass backdrop wrapper)
+- README: note glassmorphism UI
+- Glassmorphism UI + Poppins typography; credit Navadeep, link Instagram
