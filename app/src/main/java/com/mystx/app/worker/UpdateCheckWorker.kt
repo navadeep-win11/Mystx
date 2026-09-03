@@ -32,9 +32,9 @@ class UpdateCheckWorker(
         // TODO: point these at the Mystx project's real GitHub repository once it exists —
         // until then the API answers 404, doWork() retries quietly, and no notification fires.
         private const val GITHUB_API_URL =
-            "https://api.github.com/repos/Musheer360/Mystx/releases/latest"
+            "https://api.github.com/repos/navadeep-win11/Mystx/releases/latest"
         private const val RELEASES_URL =
-            "https://github.com/Musheer360/Mystx/releases/latest"
+            "https://github.com/navadeep-win11/Mystx/releases/latest"
 
         /**
          * Compares dot-separated versions (e.g. "1.0.50" > "1.0.49").

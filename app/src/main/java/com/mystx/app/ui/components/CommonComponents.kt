@@ -17,7 +17,7 @@ import com.mystx.app.ui.theme.MystBlue
 import com.mystx.app.ui.theme.MystViolet
 
 /** Corner radius shared by every Mystx card and field. */
-internal val MystCardShape = RoundedCornerShape(18.dp)
+internal val MystCardShape = RoundedCornerShape(22.dp)
 
 /** The brand gradient, left to right: violet -> electric blue. */
 fun mystGradient(): Brush = Brush.horizontalGradient(listOf(MystViolet, MystBlue))
@@ -31,15 +31,19 @@ fun MystCard(
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = MystCardShape,
-        color = MaterialTheme.colorScheme.surface,
+        color = MaterialTheme.colorScheme.surface,      // translucent glass fill
         tonalElevation = 0.dp,
         shadowElevation = 0.dp,
-        border = androidx.compose.foundation.BorderStroke(
-            1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
-        )
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
     ) {
         Column(
             modifier = Modifier
+                // Sheen along the top edge — the light catch that sells the glass.
+                .background(
+                    Brush.verticalGradient(
+                        listOf(Color.White.copy(alpha = 0.06f), Color.Transparent)
+                    )
+                )
                 .padding(16.dp)
                 .then(if (fillHeight) Modifier.fillMaxHeight() else Modifier),
             content = content
@@ -116,8 +120,11 @@ fun MystItemCard(
 ) {
     Surface(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(14.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        border = androidx.compose.foundation.BorderStroke(
+            0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+        )
     ) {
         Row(
             modifier = Modifier.padding(12.dp),

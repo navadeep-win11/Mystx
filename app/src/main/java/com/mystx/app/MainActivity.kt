@@ -12,6 +12,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.*
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
@@ -23,6 +24,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.annotation.StringRes
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
@@ -31,6 +33,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mystx.app.ui.CommandsScreen
+import com.mystx.app.ui.components.MystAuroraBackdrop
 import com.mystx.app.ui.DashboardScreen
 import com.mystx.app.ui.KeysScreen
 import com.mystx.app.ui.SettingsScreen
@@ -84,11 +87,13 @@ fun MystxMainScreen(vm: MystxViewModel = viewModel()) {
         }
     }
 
-    Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+    Box(modifier = Modifier.fillMaxSize()) {
+        MystAuroraBackdrop()
+        Scaffold(
+        containerColor = Color.Transparent,
         bottomBar = {
             NavigationBar(
-                containerColor = MaterialTheme.colorScheme.background,
+                containerColor = Color.Transparent,
                 tonalElevation = 0.dp
             ) {
                 Tab.entries.forEach { tab ->
@@ -145,5 +150,6 @@ fun MystxMainScreen(vm: MystxViewModel = viewModel()) {
         ) { tab ->
             screens[tab]?.invoke()
         }
+    }
     }
 }

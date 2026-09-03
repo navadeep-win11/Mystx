@@ -675,7 +675,7 @@ fun SettingsScreen(commandManager: CommandManager, prefs: SharedPreferences, key
                 fontSize = 13.sp,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.clickable(interactionSource = null, indication = null) {
-                    uriHandler.openUri("https://github.com/Musheer360/Mystx/releases/latest")
+                    uriHandler.openUri("https://github.com/navadeep-win11/Mystx/releases/latest")
                 }
             )
             Spacer(modifier = Modifier.weight(1f))
@@ -684,7 +684,10 @@ fun SettingsScreen(commandManager: CommandManager, prefs: SharedPreferences, key
             Text(
                 text = stringResource(R.string.settings_made_by),
                 fontSize = 13.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.clickable(interactionSource = null, indication = null) {
+                    uriHandler.openUri("https://www.instagram.com/mystx.navadeep?igsi=MWdyNzN4NWFmaTAyaA==")
+                }
             )
         }
     }

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="Theme.Mystx" parent="android:Theme.Material.Light.NoActionBar">
-        <item name="android:statusBarColor">#F6F5FB</item>
-        <item name="android:navigationBarColor">#F6F5FB</item>
-        <item name="android:windowBackground">#F6F5FB</item>
+        <item name="android:statusBarColor">#F4F2FC</item>
+        <item name="android:navigationBarColor">#F4F2FC</item>
+        <item name="android:windowBackground">#F4F2FC</item>
     </style>
 
     <!--
