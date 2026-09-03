@@ -446,7 +446,8 @@ fun MystDock(
                     modifier = Modifier
                         .clip(RoundedCornerShape(22.dp))
                         .background(
-                            if (isSelected) mystGradient() else Color.Transparent
+                            if (isSelected) mystGradient()
+                            else Brush.linearGradient(listOf(Color.Transparent, Color.Transparent))
                         )
                         .clickable {
                             if (!isSelected) {

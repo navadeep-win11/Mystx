@@ -35,7 +35,8 @@ import com.mystx.app.model.PrefKeys
 import com.mystx.app.model.ProviderType
 import com.mystx.app.provider.BaiConfig
 import com.mystx.app.provider.GroqConfig
-import androidx.compose.material.icons.filled.VpnKey
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lock
 import com.mystx.app.ui.components.MystEmptyState
 import com.mystx.app.ui.components.MystDialog
 import com.mystx.app.ui.components.MystGradientButton
@@ -247,7 +248,7 @@ fun KeysScreen(keyManager: KeyManager, prefs: SharedPreferences) {
                     contentAlignment = Alignment.Center
                 ) {
                     MystEmptyState(
-                        icon = Icons.Default.VpnKey,
+                        icon = Icons.Default.Lock,
                         message = stringResource(R.string.keys_empty)
                     )
                 }
