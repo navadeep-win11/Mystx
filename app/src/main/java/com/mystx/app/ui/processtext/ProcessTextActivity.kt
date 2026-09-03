@@ -24,13 +24,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -53,6 +50,8 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.mystx.app.R
 import com.mystx.app.model.Command
 import com.mystx.app.ui.components.MystCard
+import com.mystx.app.ui.components.MystGradientButton
+import com.mystx.app.ui.components.MystTonalButton
 import com.mystx.app.ui.components.MystItemCard
 import com.mystx.app.ui.components.MystToast
 import com.mystx.app.ui.components.MystToastTokens
@@ -246,37 +245,28 @@ private fun ProcessTextSheet(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         if (s.canInsert) {
-                            Button(
+                            MystGradientButton(
+                                text = stringResource(R.string.process_text_replace),
                                 onClick = {
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                     onInsert(selection.text, s.result)
                                 },
-                                shape = MystButtonShape,
-                                modifier = Modifier.weight(1f).heightIn(min = 48.dp)
-                            ) {
-                                Text(stringResource(R.string.process_text_replace))
-                            }
+                                modifier = Modifier.weight(1f)
+                            )
                         }
-                        // Same filled look as Replace, not the secondary TextButton style: all
-                        // three read as one row of equal, equally-weighted actions rather than
-                        // one primary action plus two lesser ones.
-                        Button(
+                        MystTonalButton(
+                            text = stringResource(R.string.process_text_copy),
                             onClick = {
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 onCopy(s.result)
                             },
-                            shape = MystButtonShape,
-                            modifier = Modifier.weight(1f).heightIn(min = 48.dp)
-                        ) {
-                            Text(stringResource(R.string.process_text_copy))
-                        }
-                        Button(
+                            modifier = Modifier.weight(1f)
+                        )
+                        MystTonalButton(
+                            text = stringResource(R.string.process_text_back),
                             onClick = { viewModel.backToCommands() },
-                            shape = MystButtonShape,
-                            modifier = Modifier.weight(1f).heightIn(min = 48.dp)
-                        ) {
-                            Text(stringResource(R.string.process_text_back))
-                        }
+                            modifier = Modifier.weight(1f)
+                        )
                     }
                 }
                 is UiState.Error -> {
@@ -293,24 +283,18 @@ private fun ProcessTextSheet(
                     ) {
                         // Offered only for failures a re-run could actually fix.
                         s.retry?.let { command ->
-                            Button(
+                            MystGradientButton(
+                                text = stringResource(R.string.process_text_retry),
                                 onClick = {
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                     viewModel.run(command)
-                                },
-                                shape = MystButtonShape,
-                                modifier = Modifier.heightIn(min = 48.dp)
-                            ) {
-                                Text(stringResource(R.string.process_text_retry))
-                            }
+                                }
+                            )
                         }
-                        TextButton(
-                            onClick = { viewModel.backToCommands() },
-                            shape = MystButtonShape,
-                            modifier = Modifier.heightIn(min = 48.dp)
-                        ) {
-                            Text(stringResource(R.string.process_text_back))
-                        }
+                        MystTonalButton(
+                            text = stringResource(R.string.process_text_back),
+                            onClick = { viewModel.backToCommands() }
+                        )
                     }
                 }
             }
@@ -332,15 +316,12 @@ private fun FatalMessage(message: String, onDismiss: () -> Unit) {
         modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
     ) {
-        TextButton(
-            onClick = onDismiss,
-            shape = MystButtonShape,
-            modifier = Modifier.heightIn(min = 48.dp)
-        ) {
+        MystTonalButton(
             // Reuses an existing label that is already translated in all 39 locales, rather than
             // adding a new string that would ship English-only to everyone else.
-            Text(stringResource(R.string.commands_cancel))
-        }
+            text = stringResource(R.string.commands_cancel),
+            onClick = onDismiss
+        )
     }
 }
 
@@ -403,8 +384,5 @@ private fun CommandRows(commands: List<Command>, onPick: (Command) -> Unit) {
         }
     }
 }
-
-/** Corner radius every other button in the app uses. */
-private val MystButtonShape = RoundedCornerShape(10.dp)
 
 private const val ANIM_MS = 250

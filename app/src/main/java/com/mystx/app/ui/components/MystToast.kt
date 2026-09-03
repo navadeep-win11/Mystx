@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.sp
  */
 object MystToastTokens {
     /** Same ARGB the View implementation has always used. */
-    const val BACKGROUND_ARGB: Int = 0xF01A1633.toInt()
+    const val BACKGROUND_ARGB: Int = 0xF00D2A30.toInt()
     const val DURATION_MS: Long = 3_500L
     const val ANIM_DURATION_MS: Int = 300
     const val SLIDE_DISTANCE_DP: Int = 40

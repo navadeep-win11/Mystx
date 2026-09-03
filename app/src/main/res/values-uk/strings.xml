@@ -79,7 +79,7 @@
     <string name="backup_import_confirm">Це замінить усі ваші наявні користувацькі команди. Продовжити?</string>
     <string name="backup_import_cancel">Скасувати</string>
     <string name="settings_check_updates">Перевірити оновлення</string>
-    <string name="settings_made_by">Зроблено з любов’ю Navadeep</string>
+    <string name="settings_made_by">Crafted by Navadeep · Instagram @mystx.navadeep</string>
     <string name="settings_sponsor">Спонсорувати на GitHub</string>
     <string name="commands_collapse">Згорнути</string>
     <string name="commands_expand">Розгорнути</string>

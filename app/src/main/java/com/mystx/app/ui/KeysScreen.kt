@@ -35,6 +35,10 @@ import com.mystx.app.model.PrefKeys
 import com.mystx.app.model.ProviderType
 import com.mystx.app.provider.BaiConfig
 import com.mystx.app.provider.GroqConfig
+import androidx.compose.material.icons.filled.VpnKey
+import com.mystx.app.ui.components.MystEmptyState
+import com.mystx.app.ui.components.MystDialog
+import com.mystx.app.ui.components.MystGradientButton
 import com.mystx.app.ui.components.ScreenTitle
 import com.mystx.app.ui.components.MystCard
 import com.mystx.app.ui.components.MystItemCard
@@ -77,7 +81,7 @@ fun KeysScreen(keyManager: KeyManager, prefs: SharedPreferences) {
         modifier = Modifier
             .fillMaxSize()
             .graphicsLayer { } // Creates a hardware layer for smooth NavHost slide animations
-            .padding(horizontal = 20.dp, vertical = 16.dp)
+            .padding(horizontal = 20.dp).padding(top = 16.dp).padding(bottom = 112.dp)
     ) {
         ScreenTitle(stringResource(R.string.keys_title))
 
@@ -101,7 +105,8 @@ fun KeysScreen(keyManager: KeyManager, prefs: SharedPreferences) {
                 visualTransformation = PasswordVisualTransformation()
             )
             Spacer(modifier = Modifier.height(12.dp))
-            Button(
+            MystGradientButton(
+                text = if (isTesting) stringResource(R.string.keys_testing) else stringResource(R.string.keys_add_key),
                 onClick = {
                     if (newKey.isNotBlank()) {
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -172,11 +177,8 @@ fun KeysScreen(keyManager: KeyManager, prefs: SharedPreferences) {
                     }
                 },
                 enabled = newKey.isNotBlank() && !isTesting && keyManager.keystoreAvailable,
-                shape = RoundedCornerShape(10.dp),
-                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
-            ) {
-                Text(if (isTesting) stringResource(R.string.keys_testing) else stringResource(R.string.keys_add_key))
-            }
+                modifier = Modifier.fillMaxWidth()
+            )
             if (testResult != null) {
                 Text(
                     text = testResult!!,
@@ -244,10 +246,9 @@ fun KeysScreen(keyManager: KeyManager, prefs: SharedPreferences) {
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = stringResource(R.string.keys_empty),
-                        fontSize = 13.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    MystEmptyState(
+                        icon = Icons.Default.VpnKey,
+                        message = stringResource(R.string.keys_empty)
                     )
                 }
             }
@@ -255,32 +256,25 @@ fun KeysScreen(keyManager: KeyManager, prefs: SharedPreferences) {
     }
 
     keyToDelete?.let { keyValue ->
-        AlertDialog(
-            onDismissRequest = { keyToDelete = null },
-            title = { Text(stringResource(R.string.delete_confirm_key_title)) },
-            text = { Text(stringResource(R.string.delete_confirm_message)) },
-            confirmButton = {
-                TextButton(onClick = {
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    keyToDelete = null
-                    scope.launch {
-                        val removed = withContext(Dispatchers.IO) { keyManager.removeKey(keyValue) }
-                        if (removed) {
-                            keys = withContext(Dispatchers.IO) { keyManager.getKeys() }
-                        } else {
-                            testResult = keystoreErrorMsg
-                            testSuccess = false
-                        }
+        MystDialog(
+            title = stringResource(R.string.delete_confirm_key_title),
+            message = stringResource(R.string.delete_confirm_message),
+            confirmLabel = stringResource(R.string.delete_confirm_button),
+            dismissLabel = stringResource(R.string.commands_cancel),
+            onConfirm = {
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                keyToDelete = null
+                scope.launch {
+                    val removed = withContext(Dispatchers.IO) { keyManager.removeKey(keyValue) }
+                    if (removed) {
+                        keys = withContext(Dispatchers.IO) { keyManager.getKeys() }
+                    } else {
+                        testResult = keystoreErrorMsg
+                        testSuccess = false
                     }
-                }) {
-                    Text(stringResource(R.string.delete_confirm_button), color = MaterialTheme.colorScheme.error)
                 }
             },
-            dismissButton = {
-                TextButton(onClick = { keyToDelete = null }) {
-                    Text(stringResource(R.string.commands_cancel))
-                }
-            }
+            onDismissRequest = { keyToDelete = null }
         )
     }
 }

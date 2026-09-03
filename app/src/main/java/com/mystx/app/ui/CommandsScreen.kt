@@ -39,6 +39,9 @@ import com.mystx.app.R
 import com.mystx.app.manager.CommandManager
 import com.mystx.app.model.Command
 import com.mystx.app.model.CommandType
+import com.mystx.app.ui.components.MystDialog
+import com.mystx.app.ui.components.MystGradientButton
+import com.mystx.app.ui.components.MystTonalButton
 import com.mystx.app.ui.components.ScreenTitle
 import com.mystx.app.ui.components.MystCard
 import com.mystx.app.ui.components.MystItemCard
@@ -87,7 +90,7 @@ fun CommandsScreen(commandManager: CommandManager) {
         modifier = Modifier
             .fillMaxSize()
             .graphicsLayer { }
-            .padding(horizontal = 20.dp, vertical = 16.dp)
+            .padding(horizontal = 20.dp).padding(top = 16.dp).padding(bottom = 112.dp)
     ) {
         ScreenTitle(stringResource(R.string.commands_title))
 
@@ -413,7 +416,8 @@ fun CommandsScreen(commandManager: CommandManager) {
                     }
                     Spacer(modifier = Modifier.height(12.dp))
                     if (editingTrigger != null) {
-                        TextButton(
+                        MystTonalButton(
+                            text = stringResource(R.string.commands_cancel),
                             onClick = {
                                 trigger = ""
                                 prompt = ""
@@ -423,25 +427,24 @@ fun CommandsScreen(commandManager: CommandManager) {
                                 isFormExpanded = false
                             },
                             modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(stringResource(R.string.commands_cancel))
-                        }
+                        )
                     }
-                    Button(
+                    MystGradientButton(
+                        text = if (editingTrigger != null) stringResource(R.string.commands_save_command) else stringResource(R.string.commands_add_command),
                         onClick = {
                             val trimmedTrigger = trigger.trim()
                             if (trimmedTrigger.isNotBlank() && prompt.isNotBlank()) {
                                 if (!trimmedTrigger.startsWith(prefix)) {
                                     errorMessage = errorPrefixMsg
-                                    return@Button
+                                    return@MystGradientButton
                                 }
                                 if (trimmedTrigger == prefix || trimmedTrigger.length <= prefix.length) {
                                     errorMessage = errorEmptyTrigger
-                                    return@Button
+                                    return@MystGradientButton
                                 }
                                 if (commands.any { it.trigger == trimmedTrigger && it.trigger != editingTrigger }) {
                                     errorMessage = errorDuplicateMsg
-                                    return@Button
+                                    return@MystGradientButton
                                 }
                                 val conflicting = commands.firstOrNull {
                                     it.trigger != editingTrigger &&
@@ -449,11 +452,11 @@ fun CommandsScreen(commandManager: CommandManager) {
                                 }
                                 if (conflicting != null) {
                                     errorMessage = errorConflictTemplate.replace("\u0000", conflicting.trigger)
-                                    return@Button
+                                    return@MystGradientButton
                                 }
                                 if (!CommandManager.isValidCommand(trimmedTrigger, prompt.trim(), prefix)) {
                                     errorMessage = errorEmptyTrigger
-                                    return@Button
+                                    return@MystGradientButton
                                 }
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 // Single atomic write: replaces the command being edited (or the
@@ -463,7 +466,7 @@ fun CommandsScreen(commandManager: CommandManager) {
                                     replacing = editingTrigger ?: trimmedTrigger
                                 )
                                 commands = commandManager.getCommands()
-                                if (!saved) return@Button
+                                if (!saved) return@MystGradientButton
                                 trigger = ""
                                 prompt = ""
                                 errorMessage = null
@@ -473,45 +476,35 @@ fun CommandsScreen(commandManager: CommandManager) {
                             }
                         },
                         enabled = trigger.isNotBlank() && trigger.trim() != prefix && prompt.isNotBlank(),
-                        shape = RoundedCornerShape(10.dp),
-                        modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
-                    ) {
-                        Text(if (editingTrigger != null) stringResource(R.string.commands_save_command) else stringResource(R.string.commands_add_command))
-                    }
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
             }
         }
     }
 
     commandToDelete?.let { triggerToDelete ->
-        AlertDialog(
-            onDismissRequest = { commandToDelete = null },
-            title = { Text(stringResource(R.string.delete_confirm_command_title)) },
-            text = { Text(stringResource(R.string.delete_confirm_message)) },
-            confirmButton = {
-                TextButton(onClick = {
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    commandManager.removeCustomCommand(triggerToDelete)
-                    expandedIds = expandedIds - triggerToDelete
-                    if (editingTrigger == triggerToDelete) {
-                        trigger = ""
-                        prompt = ""
-                        errorMessage = null
-                        editingTrigger = null
-                        selectedType = CommandType.AI
-                        isFormExpanded = false
-                    }
-                    commands = commandManager.getCommands()
-                    commandToDelete = null
-                }) {
-                    Text(stringResource(R.string.delete_confirm_button), color = MaterialTheme.colorScheme.error)
+        MystDialog(
+            title = stringResource(R.string.delete_confirm_command_title),
+            message = stringResource(R.string.delete_confirm_message),
+            confirmLabel = stringResource(R.string.delete_confirm_button),
+            dismissLabel = stringResource(R.string.commands_cancel),
+            onConfirm = {
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                commandManager.removeCustomCommand(triggerToDelete)
+                expandedIds = expandedIds - triggerToDelete
+                if (editingTrigger == triggerToDelete) {
+                    trigger = ""
+                    prompt = ""
+                    errorMessage = null
+                    editingTrigger = null
+                    selectedType = CommandType.AI
+                    isFormExpanded = false
                 }
+                commands = commandManager.getCommands()
+                commandToDelete = null
             },
-            dismissButton = {
-                TextButton(onClick = { commandToDelete = null }) {
-                    Text(stringResource(R.string.commands_cancel))
-                }
-            }
+            onDismissRequest = { commandToDelete = null }
         )
     }
 }

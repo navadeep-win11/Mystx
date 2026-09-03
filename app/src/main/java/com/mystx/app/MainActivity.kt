@@ -13,7 +13,12 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
@@ -23,6 +28,7 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.annotation.StringRes
 import androidx.compose.ui.graphics.Color
@@ -34,6 +40,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mystx.app.ui.CommandsScreen
+import com.mystx.app.ui.components.MystDock
+import com.mystx.app.ui.components.MystDockItem
 import com.mystx.app.ui.components.MystAuroraBackdrop
 import com.mystx.app.ui.DashboardScreen
 import com.mystx.app.ui.KeysScreen
@@ -91,66 +99,49 @@ fun MystxMainScreen(vm: MystxViewModel = viewModel()) {
     Box(modifier = Modifier.fillMaxSize()) {
         MystAuroraBackdrop()
         Scaffold(
-        containerColor = Color.Transparent,
-        bottomBar = {
-            NavigationBar(
-                containerColor = Color.Transparent,
-                tonalElevation = 0.dp
-            ) {
-                Tab.entries.forEach { tab ->
-                    NavigationBarItem(
-                        icon = {
-                            Icon(
-                                tab.icon,
-                                contentDescription = stringResource(tab.titleRes)
-                            )
-                        },
-                        label = null,
-                        selected = selectedTab == tab,
-                        onClick = {
-                            if (selectedTab != tab) {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                selectedTab = tab
-                            }
-                        },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = MaterialTheme.colorScheme.onPrimary,
-                            indicatorColor = MaterialTheme.colorScheme.primary,
-                            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    )
-                }
-            }
-        }
-    ) { innerPadding ->
-        val screens = remember {
-            Tab.entries.associateWith { tab ->
-                movableContentOf {
-                    when (tab) {
-                        Tab.Dashboard -> DashboardScreen(vm.keyManager, vm.commandManager, vm.statsManager)
-                        Tab.Keys -> KeysScreen(vm.keyManager, vm.prefs)
-                        Tab.Commands -> CommandsScreen(vm.commandManager)
-                        Tab.Settings -> SettingsScreen(vm.commandManager, vm.prefs, vm.keyManager)
+            containerColor = Color.Transparent,
+            contentWindowInsets = WindowInsets(0.dp)
+        ) { innerPadding ->
+            val screens = remember {
+                Tab.entries.associateWith { tab ->
+                    movableContentOf {
+                        when (tab) {
+                            Tab.Dashboard -> DashboardScreen(vm.keyManager, vm.commandManager, vm.statsManager)
+                            Tab.Keys -> KeysScreen(vm.keyManager, vm.prefs)
+                            Tab.Commands -> CommandsScreen(vm.commandManager)
+                            Tab.Settings -> SettingsScreen(vm.commandManager, vm.prefs, vm.keyManager)
+                        }
                     }
                 }
             }
+
+            AnimatedContent(
+                targetState = selectedTab,
+                modifier = Modifier.padding(innerPadding).statusBarsPadding(),
+                transitionSpec = {
+                    val direction = if (targetState.ordinal > initialState.ordinal)
+                        AnimatedContentTransitionScope.SlideDirection.Left
+                    else
+                        AnimatedContentTransitionScope.SlideDirection.Right
+                    slideIntoContainer(direction, tween(280, easing = FastOutSlowInEasing)) togetherWith
+                        slideOutOfContainer(direction, tween(280, easing = FastOutSlowInEasing))
+                },
+                label = "tab_transition"
+            ) { tab ->
+                screens[tab]?.invoke()
+            }
         }
 
-        AnimatedContent(
-            targetState = selectedTab,
-            modifier = Modifier.padding(innerPadding),
-            transitionSpec = {
-                val direction = if (targetState.ordinal > initialState.ordinal)
-                    AnimatedContentTransitionScope.SlideDirection.Left
-                else
-                    AnimatedContentTransitionScope.SlideDirection.Right
-                slideIntoContainer(direction, tween(250, easing = FastOutSlowInEasing)) togetherWith
-                    slideOutOfContainer(direction, tween(250, easing = FastOutSlowInEasing))
-            },
-            label = "tab_transition"
-        ) { tab ->
-            screens[tab]?.invoke()
-        }
-    }
+        // Floating glass dock — hovers over the content, centered, above the nav bar inset.
+        MystDock(
+            items = Tab.entries.map { MystDockItem(icon = it.icon, labelRes = it.titleRes) },
+            selected = selectedTab.ordinal,
+            onSelect = { index -> selectedTab = Tab.entries[index] },
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .navigationBarsPadding()
+                .padding(bottom = 14.dp)
+                .widthIn(max = 420.dp)
+        )
     }
 }

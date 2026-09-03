@@ -132,7 +132,7 @@ private fun SheetSurface(
             // Follows the finger while the sheet is being dragged.
             .offset { IntOffset(0, dragOffset.value.roundToInt()) }
             .clip(RoundedCornerShape(topStart = CORNER_DP.dp, topEnd = CORNER_DP.dp))
-            .background(MaterialTheme.colorScheme.background)
+            .background(MaterialTheme.colorScheme.surface)
             // Swallow taps that land on the sheet itself. A background alone does not consume
             // pointer input, so without this a tap on the handle or on the title row — anywhere
             // without an interactive child under it — fell through to the scrim behind and
@@ -187,7 +187,7 @@ private fun SheetHandle() {
             modifier = Modifier
                 .size(width = HANDLE_WIDTH_DP.dp, height = HANDLE_HEIGHT_DP.dp)
                 .background(
-                    color = MaterialTheme.colorScheme.outline,
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.55f),
                     shape = RoundedCornerShape(HANDLE_HEIGHT_DP.dp / 2)
                 )
         )
@@ -198,8 +198,8 @@ private const val ANIM_MS = 250
 private const val FADE_IN_MS = 200
 private const val FADE_OUT_MS = 150
 private const val EXIT_TOTAL_MS = 250L
-private const val CORNER_DP = 16
-private const val HANDLE_WIDTH_DP = 32
+private const val CORNER_DP = 28
+private const val HANDLE_WIDTH_DP = 44
 private const val HANDLE_HEIGHT_DP = 4
 /** At least the 48dp minimum interactive touch target, so nothing inside can out-claim it. */
 private const val HANDLE_ROW_HEIGHT_DP = 48

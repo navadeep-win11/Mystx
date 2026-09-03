@@ -17,18 +17,24 @@ import androidx.core.view.WindowCompat
 import com.mystx.app.R
 
 // ---------------------------------------------------------------------------
-// Mystx visual identity — glassmorphism
+// Mystx visual identity — "Abyss Glass"
 //
-// Surfaces are translucent "frosted" panels floating over a soft violet/blue
-// gradient wash. Poppins carries the brand voice. Dark glass reads as smoke
-// over indigo; light glass reads as frosted white over pastel violet.
+// Deep teal-abyss surfaces with translucent glass panels floating over a cyan
+// aqua aurora. Poppins carries the brand voice. The palette is intentionally
+// distinct from the original app's so the product reads as a different one.
 // ---------------------------------------------------------------------------
 
-/** Brand accent — the violet end of the Mystx gradient. */
-val MystViolet = Color(0xFF8B7CFF)
+/** Gradient start — luminous cyan. */
+val MystAqua = Color(0xFF22D3EE)
 
-/** Brand accent — the electric-blue end of the Mystx gradient. */
-val MystBlue = Color(0xFF4EA8FF)
+/** Gradient end — deep teal. */
+val MystTeal = Color(0xFF2DD4BF)
+
+/** Warm signal accent used sparingly for highlights. */
+val MystAmber = Color(0xFFFFB454)
+
+/** The brand gradient, left to right: cyan -> teal. */
+fun mystBrandGradient() = listOf(MystAqua, MystTeal)
 
 /** Poppins family bundled at res/font — the single brand typeface. */
 val Poppins = FontFamily(
@@ -61,41 +67,43 @@ private fun mystTypography(): Typography {
 }
 
 private val DarkColorScheme = darkColorScheme(
-    background = Color(0xFF0A0A14),
-    surface = Color(0x14131324),          // glass panel: translucent indigo
-    surfaceVariant = Color(0x1E1C2F42),   // glass item: more translucent
-    surfaceContainerHigh = Color(0x24222E52),
-    onBackground = Color(0xFFEAEAFA),
-    onSurface = Color(0xFFEAEAFA),
-    onSurfaceVariant = Color(0xFFA6A4C4),
-    outline = Color(0x33FFFFFF),          // hairline white border of glass
-    primary = MystViolet,
-    onPrimary = Color(0xFF0B0B18),
-    primaryContainer = Color(0x2E8B7CFF),
-    onPrimaryContainer = Color(0xFFD6D1FF),
-    secondary = MystBlue,
-    error = Color(0xFFFF5E7E),
-    tertiary = Color(0xFF3DE8A0),
-    tertiaryContainer = Color(0x2E3DE8A0)
+    background = Color(0xFF07131A),
+    surface = Color(0x151A2C31),          // glass panel: translucent teal-slate
+    surfaceVariant = Color(0x201C3842),   // glass item
+    surfaceContainerHigh = Color(0x2A22424E),
+    onBackground = Color(0xFFE2F3EF),
+    onSurface = Color(0xFFE2F3EF),
+    onSurfaceVariant = Color(0xFF93A8A3),
+    outline = Color(0x2EFFFFFF),          // hairline white glass edge
+    primary = MystTeal,
+    onPrimary = Color(0xFF06231C),
+    primaryContainer = Color(0x332DD4BF),
+    onPrimaryContainer = Color(0xFFB9F5EC),
+    secondary = MystAqua,
+    tertiary = Color(0xFF3DDC97),
+    tertiaryContainer = Color(0x2E3DDC97),
+    error = Color(0xFFFF6B81),
+    errorContainer = Color(0x33FF6B81)
 )
 
 private val LightColorScheme = lightColorScheme(
-    background = Color(0xFFF2F0FA),
+    background = Color(0xFFF0FAF8),
     surface = Color(0xCCFFFFFF),          // frosted white glass
-    surfaceVariant = Color(0x99F2F0FB),
-    surfaceContainerHigh = Color(0x80E9E6F8),
-    onBackground = Color(0xFF191826),
-    onSurface = Color(0xFF191826),
-    onSurfaceVariant = Color(0xFF63617E),
+    surfaceVariant = Color(0x99EDF8F5),
+    surfaceContainerHigh = Color(0x80E1F1ED),
+    onBackground = Color(0xFF10201D),
+    onSurface = Color(0xFF10201D),
+    onSurfaceVariant = Color(0xFF5C7370),
     outline = Color(0x59FFFFFF),          // glass edge highlight on light
-    primary = Color(0xFF5B48E8),
+    primary = Color(0xFF0D9488),
     onPrimary = Color(0xFFFFFFFF),
-    primaryContainer = Color(0xFFE5E1FF),
-    onPrimaryContainer = Color(0xFF241A70),
-    secondary = Color(0xFF2E7FD9),
-    error = Color(0xFFE5256B),
-    tertiary = Color(0xFF0FA675),
-    tertiaryContainer = Color(0xFFD7F5E9)
+    primaryContainer = Color(0xFFCCF3EC),
+    onPrimaryContainer = Color(0xFF06332C),
+    secondary = Color(0xFF0369A1),
+    tertiary = Color(0xFF0E9F6E),
+    tertiaryContainer = Color(0xFFD3F5E9),
+    error = Color(0xFFDC2F55),
+    errorContainer = Color(0xFFFDDDE3)
 )
 
 @Composable

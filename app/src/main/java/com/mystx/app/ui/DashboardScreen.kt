@@ -32,6 +32,13 @@ import com.mystx.app.MystxApp
 import com.mystx.app.manager.CommandManager
 import com.mystx.app.manager.KeyManager
 import com.mystx.app.manager.StatsManager
+import androidx.compose.foundation.border
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import com.mystx.app.ui.components.MystGradientButton
+import com.mystx.app.ui.components.MystStatTile
+import com.mystx.app.ui.components.MystTonalButton
+import com.mystx.app.ui.components.MystCardShape
 import com.mystx.app.ui.components.ScreenTitle
 import com.mystx.app.ui.components.MystCard
 import com.mystx.app.ui.components.MystDivider
@@ -144,79 +151,84 @@ fun DashboardScreen(keyManager: KeyManager, commandManager: CommandManager, stat
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .graphicsLayer { }
-            .padding(horizontal = 20.dp, vertical = 16.dp)
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 20.dp).padding(top = 16.dp).padding(bottom = 112.dp)
     ) {
         ScreenTitle(stringResource(R.string.dashboard_title))
 
-        // Service status + API keys
-        MystCard {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    MystPill(
-                        text = (if (isServiceEnabled) stringResource(R.string.service_status_active)
-                        else stringResource(R.string.service_status_inactive)).uppercase()
-                    )
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Box(
-                        modifier = Modifier
-                            .size(8.dp)
-                            .clip(CircleShape)
-                            .background(
-                                if (isServiceEnabled) MaterialTheme.colorScheme.tertiary
-                                else MaterialTheme.colorScheme.error
-                            )
-                    )
-                }
-                if (!isServiceEnabled) {
-                    Button(
-                        onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
-                        },
-                        shape = RoundedCornerShape(10.dp),
-                        modifier = Modifier.heightIn(min = 48.dp)
-                    ) {
-                        Text(stringResource(R.string.service_enable))
+        // Hero status panel — gradient border ring, floating enable action.
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(MystCardShape)
+                .background(MaterialTheme.colorScheme.surface)
+                .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.55f), MystCardShape)
+        ) {
+            Column(Modifier.padding(18.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        MystPill(
+                            text = (if (isServiceEnabled) stringResource(R.string.service_status_active)
+                            else stringResource(R.string.service_status_inactive)).uppercase()
+                        )
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Box(
+                            modifier = Modifier
+                                .size(8.dp)
+                                .clip(CircleShape)
+                                .background(
+                                    if (isServiceEnabled) MaterialTheme.colorScheme.tertiary
+                                    else MaterialTheme.colorScheme.error
+                                )
+                        )
+                    }
+                    if (!isServiceEnabled) {
+                        MystGradientButton(
+                            text = stringResource(R.string.service_enable),
+                            onClick = {
+                                context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+                            }
+                        )
                     }
                 }
-            }
 
-            Spacer(modifier = Modifier.height(12.dp))
-            MystDivider()
-            Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(14.dp))
+                MystDivider()
+                Spacer(modifier = Modifier.height(14.dp))
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = stringResource(R.string.dashboard_api_keys_title),
-                    fontSize = 13.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = stringResource(R.string.dashboard_keys_configured, keyCount),
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            }
-            if (keyCount == 0) {
-                Text(
-                    text = stringResource(R.string.dashboard_add_key_hint),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontSize = 13.sp,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(R.string.dashboard_api_keys_title),
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = stringResource(R.string.dashboard_keys_configured, keyCount),
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        style = androidx.compose.ui.text.TextStyle(brush = mystGradient())
+                    )
+                }
+                if (keyCount == 0) {
+                    Text(
+                        text = stringResource(R.string.dashboard_add_key_hint),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 13.sp,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                }
             }
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
         // Interrupted-service banner: the toggle can still read "on" while the process is dead.
         if (showKilledBanner) {
@@ -236,84 +248,58 @@ fun DashboardScreen(keyManager: KeyManager, commandManager: CommandManager, stat
                 Spacer(modifier = Modifier.height(12.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    Button(
+                    MystGradientButton(
+                        text = stringResource(R.string.service_enable),
                         onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             clearCrashMarker(context)
                             showKilledBanner = false
                             context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
                         },
-                        shape = RoundedCornerShape(10.dp),
-                        modifier = Modifier.heightIn(min = 48.dp)
-                    ) {
-                        Text(stringResource(R.string.service_enable))
-                    }
-                    TextButton(
+                        modifier = Modifier.weight(1f)
+                    )
+                    MystTonalButton(
+                        text = stringResource(R.string.dashboard_service_killed_dismiss),
                         onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             clearCrashMarker(context)
                             showKilledBanner = false
-                        }
-                    ) {
-                        Text(stringResource(R.string.dashboard_service_killed_dismiss))
-                    }
+                        },
+                        modifier = Modifier.weight(1f)
+                    )
                 }
             }
             Spacer(modifier = Modifier.height(8.dp))
         }
 
-        // Usage statistics card
-        MystCard(modifier = Modifier.weight(1f)) {
-            // Summary row
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Column(horizontalAlignment = Alignment.Start) {
-                    Text(
-                        text = "$monthlyRequests",
-                        fontSize = 26.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        style = androidx.compose.ui.text.TextStyle(
-                            brush = mystGradient()
-                        )
-                    )
-                    Text(
-                        text = stringResource(R.string.dashboard_monthly_requests),
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                Column(horizontalAlignment = Alignment.End) {
-                    Text(
-                        text = favoriteCommand ?: noData,
-                        fontSize = 26.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        style = androidx.compose.ui.text.TextStyle(
-                            brush = mystGradient()
-                        )
-                    )
-                    Text(
-                        text = stringResource(R.string.dashboard_favorite_command),
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
+        // Stats grid — two glass tiles.
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            MystStatTile(
+                value = "$monthlyRequests",
+                label = stringResource(R.string.dashboard_monthly_requests),
+                modifier = Modifier.weight(1f)
+            )
+            MystStatTile(
+                value = favoriteCommand ?: noData,
+                label = stringResource(R.string.dashboard_favorite_command),
+                modifier = Modifier.weight(1f)
+            )
+        }
 
-            Spacer(modifier = Modifier.height(12.dp))
-            MystDivider()
-            Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
-            // 7-day bar chart
+        // 7-day activity panel with gradient bars.
+        MystCard {
             Text(
                 text = stringResource(R.string.dashboard_last_7_days),
                 fontSize = 13.sp,
+                fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
             val maxCount = dailyCounts.maxOfOrNull { it.second } ?: 0
             val dayNameFmt = remember { SimpleDateFormat("EEE", Locale.getDefault()) }
@@ -322,7 +308,7 @@ fun DashboardScreen(keyManager: KeyManager, commandManager: CommandManager, stat
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f),
+                    .height(130.dp),
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 dailyCounts.forEach { (dateStr, count) ->
@@ -352,8 +338,8 @@ fun DashboardScreen(keyManager: KeyManager, commandManager: CommandManager, stat
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .fillMaxHeight(if (maxCount > 0) (count.toFloat() / maxCount).coerceAtLeast(if (count > 0) 0.05f else 0f) else 0f)
-                                    .clip(RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp))
-                                    .background(MaterialTheme.colorScheme.primary)
+                                    .clip(RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp))
+                                    .background(mystGradient())
                             )
                         }
                         Spacer(modifier = Modifier.height(4.dp))

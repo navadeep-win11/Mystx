@@ -38,6 +38,12 @@ import com.mystx.app.model.GroqModels
 import com.mystx.app.model.PrefKeys
 import com.mystx.app.model.ProviderType
 import com.mystx.app.provider.EndpointValidator
+import androidx.compose.foundation.border
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import com.mystx.app.ui.components.MystDialog
+import com.mystx.app.ui.components.MystGradientButton
+import com.mystx.app.ui.components.MystTonalButton
 import com.mystx.app.ui.components.ScreenTitle
 import com.mystx.app.ui.components.MystCard
 import com.mystx.app.ui.components.MystDivider
@@ -182,8 +188,8 @@ fun SettingsScreen(commandManager: CommandManager, prefs: SharedPreferences, key
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .graphicsLayer { }
-            .padding(horizontal = 20.dp, vertical = 16.dp)
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 20.dp).padding(top = 16.dp).padding(bottom = 112.dp)
     ) {
         ScreenTitle(stringResource(R.string.settings_title))
 
@@ -477,9 +483,9 @@ fun SettingsScreen(commandManager: CommandManager, prefs: SharedPreferences, key
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
                 ) {
-                    TextButton(
+                    MystGradientButton(
+                        text = if (isFetchingModels) fetchingModelsMsg else fetchModelsMsg,
                         onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             isFetchingModels = true
                             fetchMessage = null
                             scope.launch {
@@ -511,9 +517,7 @@ fun SettingsScreen(commandManager: CommandManager, prefs: SharedPreferences, key
                             }
                         },
                         enabled = customEndpoint.isNotBlank() && endpointError == null && !isFetchingModels
-                    ) {
-                        Text(if (isFetchingModels) fetchingModelsMsg else fetchModelsMsg)
-                    }
+                    )
                 }
                 fetchMessage?.let { msg ->
                     Text(
@@ -626,28 +630,22 @@ fun SettingsScreen(commandManager: CommandManager, prefs: SharedPreferences, key
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Button(
+                MystGradientButton(
+                    text = stringResource(R.string.backup_export),
                     onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         backupMessage = null
                         exportLauncher.launch("mystx-commands.json")
                     },
-                    shape = RoundedCornerShape(10.dp),
-                    modifier = Modifier.weight(1f).heightIn(min = 48.dp)
-                ) {
-                    Text(stringResource(R.string.backup_export))
-                }
-                Button(
+                    modifier = Modifier.weight(1f)
+                )
+                MystTonalButton(
+                    text = stringResource(R.string.backup_import),
                     onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         backupMessage = null
                         showImportConfirm = true
                     },
-                    shape = RoundedCornerShape(10.dp),
-                    modifier = Modifier.weight(1f).heightIn(min = 48.dp)
-                ) {
-                    Text(stringResource(R.string.backup_import))
-                }
+                    modifier = Modifier.weight(1f)
+                )
             }
             backupMessage?.let { msg ->
                 Text(
@@ -661,26 +659,17 @@ fun SettingsScreen(commandManager: CommandManager, prefs: SharedPreferences, key
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Card 4: About
-        MystCard(modifier = Modifier.weight(1f), fillHeight = true) {
+        // Card 4: About — version, Instagram. No GitHub link in the UI.
+        MystCard {
             Text(
                 text = stringResource(R.string.app_name) + " v" + BuildConfig.VERSION_NAME,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onSurface
             )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = stringResource(R.string.settings_check_updates),
-                fontSize = 13.sp,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.clickable(interactionSource = null, indication = null) {
-                    uriHandler.openUri("https://github.com/navadeep-win11/Mystx/releases/latest")
-                }
-            )
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(10.dp))
             MystDivider()
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = stringResource(R.string.settings_made_by),
                 fontSize = 13.sp,
@@ -693,22 +682,16 @@ fun SettingsScreen(commandManager: CommandManager, prefs: SharedPreferences, key
     }
 
     if (showImportConfirm) {
-        AlertDialog(
-            onDismissRequest = { showImportConfirm = false },
-            title = { Text(stringResource(R.string.backup_import)) },
-            text = { Text(stringResource(R.string.backup_import_confirm)) },
-            confirmButton = {
-                TextButton(onClick = {
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    showImportConfirm = false
-                    importLauncher.launch(arrayOf("application/json"))
-                }) { Text(stringResource(R.string.backup_import)) }
+        MystDialog(
+            title = stringResource(R.string.backup_import),
+            message = stringResource(R.string.backup_import_confirm),
+            confirmLabel = stringResource(R.string.backup_import),
+            dismissLabel = stringResource(R.string.backup_import_cancel),
+            onConfirm = {
+                showImportConfirm = false
+                importLauncher.launch(arrayOf("application/json"))
             },
-            dismissButton = {
-                TextButton(onClick = { showImportConfirm = false }) {
-                    Text(stringResource(R.string.backup_import_cancel))
-                }
-            }
+            onDismissRequest = { showImportConfirm = false }
         )
     }
 }
