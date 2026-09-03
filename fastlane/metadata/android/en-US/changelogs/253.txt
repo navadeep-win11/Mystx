@@ -1,0 +1,5 @@
+- Rewrite README for Mystx (providers, setup, build, upstream credits)
+- Disable Dependabot: personal app repo, updates managed manually
+- Rename CI artifacts and PR comments to Mystx
+- Rebrand to Mystx: new name, icon, UI theme, and B.ai provider
+- chore(deps): bump gradle-wrapper from 9.6.1 to 9.7.0
