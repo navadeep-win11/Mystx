@@ -1,0 +1,1 @@
+- feat(branding): launcher logo replaced with provided logo.png (artwork unchanged)
