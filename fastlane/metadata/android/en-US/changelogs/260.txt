@@ -1,0 +1,2 @@
+- fix(ui): compile fixes — core icon set, dock background branch, shape import
+- feat(ui): complete glass redesign — abyss aqua/teal identity, floating dock, glass kit
