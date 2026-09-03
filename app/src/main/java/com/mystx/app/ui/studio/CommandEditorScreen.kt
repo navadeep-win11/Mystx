@@ -63,6 +63,16 @@ fun CommandEditorScreen(
     val isBuiltIn = initialCommand?.isBuiltIn == true
     val prefix = store.commandManager.getTriggerPrefix()
 
+    // Localized validation strings
+    val errorTriggerEmpty = stringResource(R.string.command_studio_error_trigger_empty)
+    val errorTriggerPrefix = stringResource(R.string.command_studio_error_trigger_prefix, prefix)
+    val errorEmptyTrigger = stringResource(R.string.commands_error_empty_trigger)
+    val errorTriggerDuplicate = stringResource(R.string.command_studio_error_trigger_duplicate)
+    val errorNameEmpty = stringResource(R.string.command_studio_error_name_empty)
+    val errorPromptEmpty = stringResource(R.string.command_studio_error_prompt_empty)
+    val errorMissingText = stringResource(R.string.command_studio_error_missing_text)
+    val errorSafetyBlocked = stringResource(R.string.error_safety_blocked)
+
     // Form fields
     var name by rememberSaveable { mutableStateOf(initialCommand?.name ?: "") }
     var trigger by rememberSaveable { mutableStateOf(initialCommand?.trigger ?: prefix) }
@@ -187,10 +197,10 @@ fun CommandEditorScreen(
                     val clean = input.take(CommandManager.MAX_TRIGGER_LENGTH)
                     trigger = clean
                     triggerError = when {
-                        clean.isBlank() -> context.getString(R.string.command_studio_error_trigger_empty)
-                        !clean.startsWith(prefix) -> context.getString(R.string.command_studio_error_trigger_prefix, prefix)
-                        clean.length <= prefix.length -> context.getString(R.string.commands_error_empty_trigger)
-                        store.isTriggerTaken(clean, excludingId = initialCommand?.id) -> context.getString(R.string.command_studio_error_trigger_duplicate)
+                        clean.isBlank() -> errorTriggerEmpty
+                        !clean.startsWith(prefix) -> errorTriggerPrefix
+                        clean.length <= prefix.length -> errorEmptyTrigger
+                        store.isTriggerTaken(clean, excludingId = initialCommand?.id) -> errorTriggerDuplicate
                         else -> null
                     }
                 },
@@ -541,7 +551,7 @@ fun CommandEditorScreen(
                                 testResultIsError = false
                             }
                             is CommandOutcome.Refusal -> {
-                                testResultText = context.getString(R.string.error_safety_blocked)
+                                testResultText = errorSafetyBlocked
                                 testResultIsError = true
                             }
                             is CommandOutcome.Unavailable -> {
@@ -601,28 +611,28 @@ fun CommandEditorScreen(
                 val trimmedTrigger = trigger.trim()
 
                 if (trimmedName.isBlank()) {
-                    nameError = context.getString(R.string.command_studio_error_name_empty)
+                    nameError = errorNameEmpty
                     hasError = true
                 }
                 if (trimmedTrigger.isBlank()) {
-                    triggerError = context.getString(R.string.command_studio_error_trigger_empty)
+                    triggerError = errorTriggerEmpty
                     hasError = true
                 } else if (!trimmedTrigger.startsWith(prefix)) {
-                    triggerError = context.getString(R.string.command_studio_error_trigger_prefix, prefix)
+                    triggerError = errorTriggerPrefix
                     hasError = true
                 } else if (trimmedTrigger.length <= prefix.length) {
-                    triggerError = context.getString(R.string.commands_error_empty_trigger)
+                    triggerError = errorEmptyTrigger
                     hasError = true
                 } else if (store.isTriggerTaken(trimmedTrigger, excludingId = initialCommand?.id)) {
-                    triggerError = context.getString(R.string.command_studio_error_trigger_duplicate)
+                    triggerError = errorTriggerDuplicate
                     hasError = true
                 }
 
                 if (promptText.isBlank()) {
-                    promptError = context.getString(R.string.command_studio_error_prompt_empty)
+                    promptError = errorPromptEmpty
                     hasError = true
                 } else if (PromptPlaceholders.requiresText(promptText)) {
-                    promptError = context.getString(R.string.command_studio_error_missing_text)
+                    promptError = errorMissingText
                     hasError = true
                 }
 
