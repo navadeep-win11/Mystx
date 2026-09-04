@@ -88,6 +88,10 @@ fun SettingsScreen(
     var endpointError by remember { mutableStateOf<String?>(null) }
 
     var modelExpanded by remember { mutableStateOf(false) }
+    var isFetchingModels by remember { mutableStateOf(false) }
+    var fetchMessage by remember { mutableStateOf<String?>(null) }
+    var fetchSuccess by remember { mutableStateOf(false) }
+
     var currentModels by remember {
         mutableStateOf(ModelDiscoveryService.getCachedModels(providerType, prefs, customEndpoint))
     }
@@ -105,9 +109,6 @@ fun SettingsScreen(
         providerExpanded = false
         modelExpanded = false
     }
-    var isFetchingModels by remember { mutableStateOf(false) }
-    var fetchMessage by remember { mutableStateOf<String?>(null) }
-    var fetchSuccess by remember { mutableStateOf(false) }
     var apiKeys by remember { mutableStateOf<List<String>>(emptyList()) }
 
     var triggerPrefix by remember { mutableStateOf(commandManager.getTriggerPrefix()) }
