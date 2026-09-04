@@ -1,0 +1,2 @@
+- fix(ui): declare fetchMessage before LaunchedEffect in SettingsScreen
+- feat: implement universal dynamic model discovery for all providers
