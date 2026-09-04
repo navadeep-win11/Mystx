@@ -74,7 +74,11 @@ object GeminiConfig : ProviderConfig {
     override val transport = Transport.GEMINI_NATIVE
     override val modelPrefKey = PrefKeys.GEMINI_MODEL
     override val defaultModel = GeminiModels.DEFAULT
-    override fun sanitizeModel(stored: String?): String = GeminiModels.sanitize(stored)
+    override fun sanitizeModel(stored: String?): String {
+        val trimmed = stored?.trim()
+        if (trimmed.isNullOrBlank() || trimmed == "gemini-2.5-flash-lite") return defaultModel
+        return trimmed
+    }
     override fun resolveEndpoint(customEndpoint: String): String = ""
     override fun thinkingLevel(model: String): String? = GeminiModels.thinkingLevel(model)
 }
@@ -87,7 +91,11 @@ object GroqConfig : ProviderConfig {
     override val transport = Transport.OPENAI_COMPAT
     override val modelPrefKey = PrefKeys.GROQ_MODEL
     override val defaultModel = GroqModels.DEFAULT
-    override fun sanitizeModel(stored: String?): String = GroqModels.sanitize(stored)
+    override fun sanitizeModel(stored: String?): String {
+        val trimmed = stored?.trim()
+        if (trimmed.isNullOrBlank()) return defaultModel
+        return trimmed
+    }
     override fun resolveEndpoint(customEndpoint: String): String = ENDPOINT
     override fun reasoningParams(model: String): Map<String, Any> = GroqModels.reasoningParams(model)
     override fun useJsonObjectMode(structuredOutputEnabled: Boolean): Boolean = structuredOutputEnabled
@@ -105,7 +113,11 @@ object BaiConfig : ProviderConfig {
     override val transport = Transport.OPENAI_COMPAT
     override val modelPrefKey = PrefKeys.BAI_MODEL
     override val defaultModel = BaiModels.DEFAULT
-    override fun sanitizeModel(stored: String?): String = BaiModels.sanitize(stored)
+    override fun sanitizeModel(stored: String?): String {
+        val trimmed = stored?.trim()
+        if (trimmed.isNullOrBlank()) return defaultModel
+        return trimmed
+    }
     override fun resolveEndpoint(customEndpoint: String): String = ENDPOINT
 }
 

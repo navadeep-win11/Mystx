@@ -25,7 +25,6 @@ import androidx.compose.ui.unit.sp
 import com.mystx.app.BuildConfig
 import com.mystx.app.R
 import com.mystx.app.api.ApiClientUtils
-import com.mystx.app.api.OpenAICompatibleClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -38,7 +37,11 @@ import com.mystx.app.model.GeminiModels
 import com.mystx.app.model.GroqModels
 import com.mystx.app.model.PrefKeys
 import com.mystx.app.model.ProviderType
+import com.mystx.app.provider.BaiConfig
 import com.mystx.app.provider.EndpointValidator
+import com.mystx.app.provider.GeminiConfig
+import com.mystx.app.provider.GroqConfig
+import com.mystx.app.service.discovery.ModelDiscoveryService
 import androidx.compose.foundation.border
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -76,40 +79,36 @@ fun SettingsScreen(
     var providerType by remember { mutableStateOf(prefs.getString(PrefKeys.PROVIDER_TYPE, ProviderType.GEMINI) ?: ProviderType.GEMINI) }
     var providerExpanded by remember { mutableStateOf(false) }
 
-    var selectedModel by remember { mutableStateOf(GeminiModels.sanitize(prefs.getString(PrefKeys.GEMINI_MODEL, GeminiModels.DEFAULT))) }
-    var modelExpanded by remember { mutableStateOf(false) }
-    val geminiModels = GeminiModels.OPTIONS
-
-    var groqModel by remember { mutableStateOf(GroqModels.sanitize(prefs.getString(PrefKeys.GROQ_MODEL, GroqModels.DEFAULT))) }
-    var groqModelExpanded by remember { mutableStateOf(false) }
-    val groqModels = GroqModels.OPTIONS
-
-    var baiModel by remember { mutableStateOf(BaiModels.sanitize(prefs.getString(PrefKeys.BAI_MODEL, BaiModels.DEFAULT))) }
-    var baiModelExpanded by remember { mutableStateOf(false) }
-    val baiModels = BaiModels.OPTIONS
+    var selectedModel by remember { mutableStateOf(GeminiConfig.sanitizeModel(prefs.getString(PrefKeys.GEMINI_MODEL, GeminiModels.DEFAULT))) }
+    var groqModel by remember { mutableStateOf(GroqConfig.sanitizeModel(prefs.getString(PrefKeys.GROQ_MODEL, GroqModels.DEFAULT))) }
+    var baiModel by remember { mutableStateOf(BaiConfig.sanitizeModel(prefs.getString(PrefKeys.BAI_MODEL, BaiModels.DEFAULT))) }
 
     var customEndpoint by rememberSaveable { mutableStateOf(prefs.getString(PrefKeys.CUSTOM_ENDPOINT, "") ?: "") }
     var customModel by rememberSaveable { mutableStateOf(prefs.getString(PrefKeys.CUSTOM_MODEL, "") ?: "") }
     var endpointError by remember { mutableStateOf<String?>(null) }
-    // Fetched model ids for the Custom provider dropdown. Session state only — refetched on
-    // demand, never persisted (the stored pref stays the plain custom_model string).
-    var customModels by remember { mutableStateOf<List<String>>(emptyList()) }
-    var customModelExpanded by remember { mutableStateOf(false) }
+
+    var modelExpanded by remember { mutableStateOf(false) }
+    var currentModels by remember {
+        mutableStateOf(ModelDiscoveryService.getCachedModels(providerType, prefs, customEndpoint))
+    }
+
+    // Keep models in sync when provider or custom endpoint changes
+    LaunchedEffect(providerType, customEndpoint) {
+        currentModels = ModelDiscoveryService.getCachedModels(providerType, prefs, customEndpoint)
+        modelExpanded = false
+        fetchMessage = null
+    }
 
     // Close any open dropdown before navigating back
-    val isAnyDropdownExpanded = providerExpanded || modelExpanded || groqModelExpanded || baiModelExpanded || customModelExpanded
+    val isAnyDropdownExpanded = providerExpanded || modelExpanded
     BackHandler(enabled = isAnyDropdownExpanded) {
         providerExpanded = false
         modelExpanded = false
-        groqModelExpanded = false
-        baiModelExpanded = false
-        customModelExpanded = false
     }
     var isFetchingModels by remember { mutableStateOf(false) }
     var fetchMessage by remember { mutableStateOf<String?>(null) }
     var fetchSuccess by remember { mutableStateOf(false) }
     var apiKeys by remember { mutableStateOf<List<String>>(emptyList()) }
-    val openAIClient = remember { OpenAICompatibleClient() }
 
     var triggerPrefix by remember { mutableStateOf(commandManager.getTriggerPrefix()) }
     var prefixError by remember { mutableStateOf<String?>(null) }
@@ -126,6 +125,7 @@ fun SettingsScreen(
     val modelsEmptyMsg = stringResource(R.string.settings_fetch_models_empty)
     val modelsFailedMsg = stringResource(R.string.settings_fetch_models_failed)
     val signinRequiredMsg = stringResource(R.string.error_provider_auth_required)
+    val noApiKeyMsg = stringResource(R.string.settings_fetch_models_no_key)
 
     // Registered keys are decrypted through the Keystore — load off the main thread, as
     // KeysScreen does. The first key is sent as Bearer when fetching models; keyless local
@@ -276,9 +276,6 @@ fun SettingsScreen(
                     providerExpanded = !providerExpanded
                     if (providerExpanded) {
                         modelExpanded = false
-                        groqModelExpanded = false
-                        baiModelExpanded = false
-                        customModelExpanded = false
                     }
                 }
             ) {
@@ -341,139 +338,7 @@ fun SettingsScreen(
                 }
             }
             Spacer(modifier = Modifier.height(8.dp))
-            if (providerType == ProviderType.GEMINI) {
-                Text(
-                    text = stringResource(R.string.settings_model_title),
-                    fontSize = 13.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                ExposedDropdownMenuBox(
-                    expanded = modelExpanded,
-                    onExpandedChange = {
-                        modelExpanded = !modelExpanded
-                        if (modelExpanded) {
-                            providerExpanded = false
-                            baiModelExpanded = false
-                            groqModelExpanded = false
-                            customModelExpanded = false
-                        }
-                    }
-                ) {
-                    MystTextField(
-                        value = GeminiModels.label(selectedModel),
-                        onValueChange = {},
-                        readOnly = true,
-                        
-                        modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
-                    )
-                    MystExposedDropdownMenu(
-                        expanded = modelExpanded,
-                        onDismissRequest = { modelExpanded = false }
-                    ) {
-                        geminiModels.forEach { (id, label) ->
-                            MystDropdownMenuItem(
-                                text = label,
-                                isSelected = selectedModel == id,
-                                onClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    selectedModel = id
-                                    prefs.edit().putString(PrefKeys.GEMINI_MODEL, id).remove(PrefKeys.STRUCTURED_OUTPUT_DISABLED_AT).apply()
-                                    modelExpanded = false
-                                }
-                            )
-                        }
-                    }
-                }
-            } else if (providerType == ProviderType.BAI) {
-                Text(
-                    text = stringResource(R.string.settings_model_title),
-                    fontSize = 13.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                ExposedDropdownMenuBox(
-                    expanded = baiModelExpanded,
-                    onExpandedChange = {
-                        baiModelExpanded = !baiModelExpanded
-                        if (baiModelExpanded) {
-                            providerExpanded = false
-                            modelExpanded = false
-                            groqModelExpanded = false
-                            customModelExpanded = false
-                        }
-                    }
-                ) {
-                    MystTextField(
-                        value = BaiModels.label(baiModel),
-                        onValueChange = {},
-                        readOnly = true,
-
-                        modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
-                    )
-                    MystExposedDropdownMenu(
-                        expanded = baiModelExpanded,
-                        onDismissRequest = { baiModelExpanded = false }
-                    ) {
-                        baiModels.forEach { (id, label) ->
-                            MystDropdownMenuItem(
-                                text = label,
-                                isSelected = baiModel == id,
-                                onClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    baiModel = id
-                                    prefs.edit().putString(PrefKeys.BAI_MODEL, id).remove(PrefKeys.STRUCTURED_OUTPUT_DISABLED_AT).apply()
-                                    baiModelExpanded = false
-                                }
-                            )
-                        }
-                    }
-                }
-            } else if (providerType == ProviderType.GROQ) {
-                Text(
-                    text = stringResource(R.string.settings_model_title),
-                    fontSize = 13.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                ExposedDropdownMenuBox(
-                    expanded = groqModelExpanded,
-                    onExpandedChange = {
-                        groqModelExpanded = !groqModelExpanded
-                        if (groqModelExpanded) {
-                            providerExpanded = false
-                            modelExpanded = false
-                            baiModelExpanded = false
-                            customModelExpanded = false
-                        }
-                    }
-                ) {
-                    MystTextField(
-                        value = GroqModels.label(groqModel),
-                        onValueChange = {},
-                        readOnly = true,
-                        
-                        modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
-                    )
-                    MystExposedDropdownMenu(
-                        expanded = groqModelExpanded,
-                        onDismissRequest = { groqModelExpanded = false }
-                    ) {
-                        groqModels.forEach { (id, label) ->
-                            MystDropdownMenuItem(
-                                text = label,
-                                isSelected = groqModel == id,
-                                onClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    groqModel = id
-                                    prefs.edit().putString(PrefKeys.GROQ_MODEL, id).remove(PrefKeys.STRUCTURED_OUTPUT_DISABLED_AT).apply()
-                                    groqModelExpanded = false
-                                }
-                            )
-                        }
-                    }
-                }
-            } else {
+            if (providerType == ProviderType.CUSTOM) {
                 Text(
                     text = stringResource(R.string.settings_endpoint_title),
                     fontSize = 13.sp,
@@ -484,9 +349,6 @@ fun SettingsScreen(
                     value = customEndpoint,
                     onValueChange = {
                         customEndpoint = it
-                        // The endpoint changed — a previously fetched model list no longer
-                        // describes this server.
-                        customModels = emptyList()
                         fetchMessage = null
                         endpointError = when {
                             it.isBlank() -> null
@@ -503,7 +365,6 @@ fun SettingsScreen(
                         }
                     },
                     placeholder = { Text(stringResource(R.string.settings_endpoint_placeholder)) },
-                    
                     isError = endpointError != null
                 )
                 endpointError?.let { msg ->
@@ -515,22 +376,23 @@ fun SettingsScreen(
                     )
                 }
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = stringResource(R.string.settings_model_title),
-                    fontSize = 13.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                if (customModels.isNotEmpty()) {
+            }
+
+            Text(
+                text = stringResource(R.string.settings_model_title),
+                fontSize = 13.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            if (providerType == ProviderType.CUSTOM) {
+                if (currentModels.isNotEmpty()) {
                     ExposedDropdownMenuBox(
-                        expanded = customModelExpanded,
+                        expanded = modelExpanded,
                         onExpandedChange = {
-                            customModelExpanded = !customModelExpanded
-                            if (customModelExpanded) {
+                            modelExpanded = !modelExpanded
+                            if (modelExpanded) {
                                 providerExpanded = false
-                                modelExpanded = false
-                                baiModelExpanded = false
-                                groqModelExpanded = false
                             }
                         }
                     ) {
@@ -545,27 +407,22 @@ fun SettingsScreen(
                                 }
                             },
                             placeholder = { Text(stringResource(R.string.settings_model_placeholder)) },
-                            
-                            // Editable anchor: the fetched list is a convenience, not a
-                            // restriction — cloud models and off-list ids stay typeable.
                             modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable)
                         )
                         MystExposedDropdownMenu(
-                            expanded = customModelExpanded,
-                            onDismissRequest = { customModelExpanded = false }
+                            expanded = modelExpanded,
+                            onDismissRequest = { modelExpanded = false }
                         ) {
-                            customModels.forEach { id ->
+                            currentModels.forEach { item ->
                                 MystDropdownMenuItem(
-                                    text = id,
-                                    isSelected = customModel == id,
+                                    text = item.displayName,
+                                    isSelected = customModel == item.id,
                                     onClick = {
                                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                        customModel = id
-                                        // Cancel any pending debounce so a half-typed value
-                                        // cannot overwrite the selection 500ms later.
+                                        customModel = item.id
                                         saveModelJob?.cancel()
-                                        prefs.edit().putString(PrefKeys.CUSTOM_MODEL, id).remove(PrefKeys.STRUCTURED_OUTPUT_DISABLED_AT).apply()
-                                        customModelExpanded = false
+                                        prefs.edit().putString(PrefKeys.CUSTOM_MODEL, item.id).remove(PrefKeys.STRUCTURED_OUTPUT_DISABLED_AT).apply()
+                                        modelExpanded = false
                                     }
                                 )
                             }
@@ -582,58 +439,156 @@ fun SettingsScreen(
                                 prefs.edit().putString(PrefKeys.CUSTOM_MODEL, it).remove(PrefKeys.STRUCTURED_OUTPUT_DISABLED_AT).apply()
                             }
                         },
-                        placeholder = { Text(stringResource(R.string.settings_model_placeholder)) },
-                        
+                        placeholder = { Text(stringResource(R.string.settings_model_placeholder)) }
                     )
                 }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
+            } else {
+                val currentDisplayValue = when (providerType) {
+                    ProviderType.GEMINI -> ModelDiscoveryService.getModelLabel(selectedModel, ProviderType.GEMINI, prefs)
+                    ProviderType.GROQ -> ModelDiscoveryService.getModelLabel(groqModel, ProviderType.GROQ, prefs)
+                    ProviderType.BAI -> ModelDiscoveryService.getModelLabel(baiModel, ProviderType.BAI, prefs)
+                    else -> ""
+                }
+                ExposedDropdownMenuBox(
+                    expanded = modelExpanded,
+                    onExpandedChange = {
+                        modelExpanded = !modelExpanded
+                        if (modelExpanded) {
+                            providerExpanded = false
+                        }
+                    }
                 ) {
-                    MystGradientButton(
-                        text = if (isFetchingModels) fetchingModelsMsg else fetchModelsMsg,
-                        onClick = {
-                            isFetchingModels = true
-                            fetchMessage = null
-                            scope.launch {
-                                val result = withContext(Dispatchers.IO) {
-                                    openAIClient.fetchModels(apiKeys.firstOrNull(), customEndpoint)
-                                }
-                                isFetchingModels = false
-                                result.onSuccess { ids ->
-                                    if (ids.isEmpty()) {
-                                        customModels = emptyList()
-                                        fetchMessage = modelsEmptyMsg
-                                        fetchSuccess = false
-                                    } else {
-                                        customModels = ids
-                                        customModelExpanded = false
-                                        fetchMessage = String.format(modelsLoadedMsg, ids.size)
-                                        fetchSuccess = true
-                                    }
-                                }.onFailure { e ->
-                                    customModels = emptyList()
-                                    val raw = e.message ?: ""
-                                    fetchMessage = if (raw.contains(ApiClientUtils.SIGNIN_REQUIRED_MARKER)) {
-                                        signinRequiredMsg
-                                    } else {
-                                        modelsFailedMsg
-                                    }
-                                    fetchSuccess = false
-                                }
+                    MystTextField(
+                        value = currentDisplayValue,
+                        onValueChange = {},
+                        readOnly = true,
+                        modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                    )
+                    MystExposedDropdownMenu(
+                        expanded = modelExpanded,
+                        onDismissRequest = { modelExpanded = false }
+                    ) {
+                        currentModels.forEach { item ->
+                            val isSelected = when (providerType) {
+                                ProviderType.GEMINI -> selectedModel == item.id
+                                ProviderType.GROQ -> groqModel == item.id
+                                ProviderType.BAI -> baiModel == item.id
+                                else -> false
                             }
-                        },
-                        enabled = customEndpoint.isNotBlank() && endpointError == null && !isFetchingModels
-                    )
+                            MystDropdownMenuItem(
+                                text = item.displayName,
+                                isSelected = isSelected,
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    when (providerType) {
+                                        ProviderType.GEMINI -> {
+                                            selectedModel = item.id
+                                            prefs.edit().putString(PrefKeys.GEMINI_MODEL, item.id).remove(PrefKeys.STRUCTURED_OUTPUT_DISABLED_AT).apply()
+                                        }
+                                        ProviderType.GROQ -> {
+                                            groqModel = item.id
+                                            prefs.edit().putString(PrefKeys.GROQ_MODEL, item.id).remove(PrefKeys.STRUCTURED_OUTPUT_DISABLED_AT).apply()
+                                        }
+                                        ProviderType.BAI -> {
+                                            baiModel = item.id
+                                            prefs.edit().putString(PrefKeys.BAI_MODEL, item.id).remove(PrefKeys.STRUCTURED_OUTPUT_DISABLED_AT).apply()
+                                        }
+                                    }
+                                    modelExpanded = false
+                                }
+                            )
+                        }
+                    }
                 }
-                fetchMessage?.let { msg ->
-                    Text(
-                        text = msg,
-                        color = if (fetchSuccess) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontSize = 13.sp,
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
-                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                MystGradientButton(
+                    text = if (isFetchingModels) fetchingModelsMsg else fetchModelsMsg,
+                    onClick = {
+                        val activeKey = apiKeys.firstOrNull()
+                        if (providerType != ProviderType.CUSTOM && activeKey.isNullOrBlank()) {
+                            fetchMessage = noApiKeyMsg
+                            fetchSuccess = false
+                            return@MystGradientButton
+                        }
+                        isFetchingModels = true
+                        fetchMessage = null
+                        scope.launch {
+                            val result = ModelDiscoveryService.discoverAndCache(
+                                providerType = providerType,
+                                apiKey = activeKey,
+                                endpoint = customEndpoint,
+                                prefs = prefs
+                            )
+                            isFetchingModels = false
+                            result.onSuccess { models ->
+                                if (models.isEmpty()) {
+                                    fetchMessage = modelsEmptyMsg
+                                    fetchSuccess = false
+                                } else {
+                                    currentModels = models
+                                    modelExpanded = false
+                                    fetchMessage = String.format(modelsLoadedMsg, models.size)
+                                    fetchSuccess = true
+
+                                    when (providerType) {
+                                        ProviderType.GEMINI -> {
+                                            if (selectedModel.isBlank() || models.none { it.id == selectedModel }) {
+                                                val newModel = models.firstOrNull { it.id == GeminiModels.DEFAULT }?.id ?: models.first().id
+                                                selectedModel = newModel
+                                                prefs.edit().putString(PrefKeys.GEMINI_MODEL, newModel).remove(PrefKeys.STRUCTURED_OUTPUT_DISABLED_AT).apply()
+                                            }
+                                        }
+                                        ProviderType.GROQ -> {
+                                            if (groqModel.isBlank() || models.none { it.id == groqModel }) {
+                                                val newModel = models.firstOrNull { it.id == GroqModels.DEFAULT }?.id ?: models.first().id
+                                                groqModel = newModel
+                                                prefs.edit().putString(PrefKeys.GROQ_MODEL, newModel).remove(PrefKeys.STRUCTURED_OUTPUT_DISABLED_AT).apply()
+                                            }
+                                        }
+                                        ProviderType.BAI -> {
+                                            if (baiModel.isBlank() || models.none { it.id == baiModel }) {
+                                                val newModel = models.firstOrNull { it.id == BaiModels.DEFAULT }?.id ?: models.first().id
+                                                baiModel = newModel
+                                                prefs.edit().putString(PrefKeys.BAI_MODEL, newModel).remove(PrefKeys.STRUCTURED_OUTPUT_DISABLED_AT).apply()
+                                            }
+                                        }
+                                        ProviderType.CUSTOM -> {
+                                            if (customModel.isBlank() && models.isNotEmpty()) {
+                                                customModel = models.first().id
+                                                prefs.edit().putString(PrefKeys.CUSTOM_MODEL, customModel).remove(PrefKeys.STRUCTURED_OUTPUT_DISABLED_AT).apply()
+                                            }
+                                        }
+                                    }
+                                }
+                            }.onFailure { e ->
+                                val raw = e.message ?: ""
+                                fetchMessage = if (raw.contains(ApiClientUtils.SIGNIN_REQUIRED_MARKER)) {
+                                    signinRequiredMsg
+                                } else if (raw.isNotBlank()) {
+                                    raw
+                                } else {
+                                    modelsFailedMsg
+                                }
+                                fetchSuccess = false
+                            }
+                        }
+                    },
+                    enabled = !isFetchingModels && (providerType != ProviderType.CUSTOM || (customEndpoint.isNotBlank() && endpointError == null))
+                )
+            }
+            fetchMessage?.let { msg ->
+                Text(
+                    text = msg,
+                    color = if (fetchSuccess) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = 13.sp,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
             }
             Spacer(modifier = Modifier.height(8.dp))
             Row(

@@ -39,6 +39,7 @@ import com.mystx.app.manager.KeyManager
 import com.mystx.app.model.*
 import com.mystx.app.provider.Providers
 import com.mystx.app.service.CommandOutcome
+import com.mystx.app.service.discovery.ModelDiscoveryService
 import com.mystx.app.service.runTextCommand
 import com.mystx.app.ui.components.*
 import kotlinx.coroutines.Dispatchers
@@ -113,18 +114,12 @@ fun CommandEditorScreen(
     var testResultText by remember { mutableStateOf<String?>(null) }
     var testResultIsError by remember { mutableStateOf(false) }
 
-    // Models options based on current provider
+    // Models options based on current provider and dynamic discovery cache
     val provider = remember { Providers.forType(prefs.getString(PrefKeys.PROVIDER_TYPE, null)) }
     val availableModels: List<Pair<String, String>> = remember(provider) {
-        when (provider.type) {
-            ProviderType.GEMINI -> GeminiModels.OPTIONS
-            ProviderType.GROQ -> GroqModels.OPTIONS
-            ProviderType.BAI -> BaiModels.OPTIONS
-            else -> {
-                val custom = prefs.getString(PrefKeys.CUSTOM_MODEL, "") ?: ""
-                if (custom.isNotEmpty()) listOf(custom to custom) else emptyList()
-            }
-        }
+        val customEndpoint = prefs.getString(PrefKeys.CUSTOM_ENDPOINT, "") ?: ""
+        val models = ModelDiscoveryService.getCachedModels(provider.type, prefs, customEndpoint)
+        models.map { it.id to it.displayName }
     }
 
     Column(
