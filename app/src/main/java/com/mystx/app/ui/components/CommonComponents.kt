@@ -14,10 +14,12 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -29,6 +31,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBoxScope
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -43,6 +48,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -72,6 +78,19 @@ internal val MystCardShape = RoundedCornerShape(24.dp)
 
 /** Corner radius of compact glass elements (chips, tiles, fields). */
 internal val MystCompactShape = RoundedCornerShape(16.dp)
+
+/** Corner radius of dropdown popup menus matching Mystx compact elements. */
+val MystDropdownShape = RoundedCornerShape(14.dp)
+
+/**
+ * Background container color for dropdown popups — semi-opaque dark MYSTX glass that
+ * prevents underlying text/controls from bleeding through.
+ */
+@Composable
+fun mystDropdownContainerColor(): Color {
+    val dark = isSystemInDarkTheme()
+    return if (dark) Color(0xF80B1C24) else Color(0xF8FFFFFF)
+}
 
 /** The brand gradient, left to right: cyan -> teal. */
 fun mystGradient(): Brush = Brush.horizontalGradient(mystBrandGradient())
@@ -161,6 +180,63 @@ fun MystTextField(
             unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
             disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant
         )
+    )
+}
+
+/**
+ * Custom Elevated ExposedDropdownMenu for Mystx:
+ * Renders as a true elevated popup anchored to the input field, with solid/semi-opaque
+ * MYSTX dark glass background, subtle outline border, rounded corners, elevation,
+ * and internal scrolling without disrupting the rest of the layout.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ExposedDropdownMenuBoxScope.MystExposedDropdownMenu(
+    expanded: Boolean,
+    onDismissRequest: () -> Unit,
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    ExposedDropdownMenu(
+        expanded = expanded,
+        onDismissRequest = onDismissRequest,
+        shape = MystDropdownShape,
+        containerColor = mystDropdownContainerColor(),
+        modifier = modifier
+            .shadow(elevation = 8.dp, shape = MystDropdownShape)
+            .clip(MystDropdownShape)
+            .border(1.dp, MaterialTheme.colorScheme.outline, MystDropdownShape),
+        content = content
+    )
+}
+
+/**
+ * Styled dropdown menu item matching MYSTX design language:
+ * Clean spacing, cyan/teal accent for selected items, and comfortable vertical padding.
+ */
+@Composable
+fun MystDropdownMenuItem(
+    text: String,
+    isSelected: Boolean = false,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    leadingIcon: @Composable (() -> Unit)? = null,
+    trailingIcon: @Composable (() -> Unit)? = null
+) {
+    DropdownMenuItem(
+        text = {
+            Text(
+                text = text,
+                fontSize = 14.sp,
+                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+            )
+        },
+        onClick = onClick,
+        modifier = modifier,
+        leadingIcon = leadingIcon,
+        trailingIcon = trailingIcon,
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)
     )
 }
 

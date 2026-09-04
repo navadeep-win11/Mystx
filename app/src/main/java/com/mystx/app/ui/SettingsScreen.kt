@@ -42,6 +42,7 @@ import com.mystx.app.provider.EndpointValidator
 import androidx.compose.foundation.border
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.activity.compose.BackHandler
 import com.mystx.app.ui.components.MystDialog
 import com.mystx.app.ui.components.MystGradientButton
 import com.mystx.app.ui.components.MystTonalButton
@@ -49,6 +50,8 @@ import com.mystx.app.ui.components.ScreenTitle
 import com.mystx.app.ui.components.MystCard
 import com.mystx.app.ui.components.MystDivider
 import com.mystx.app.ui.components.MystTextField
+import com.mystx.app.ui.components.MystExposedDropdownMenu
+import com.mystx.app.ui.components.MystDropdownMenuItem
 
 import androidx.compose.ui.draw.clip
 import androidx.compose.material.icons.Icons
@@ -92,6 +95,16 @@ fun SettingsScreen(
     // demand, never persisted (the stored pref stays the plain custom_model string).
     var customModels by remember { mutableStateOf<List<String>>(emptyList()) }
     var customModelExpanded by remember { mutableStateOf(false) }
+
+    // Close any open dropdown before navigating back
+    val isAnyDropdownExpanded = providerExpanded || modelExpanded || groqModelExpanded || baiModelExpanded || customModelExpanded
+    BackHandler(enabled = isAnyDropdownExpanded) {
+        providerExpanded = false
+        modelExpanded = false
+        groqModelExpanded = false
+        baiModelExpanded = false
+        customModelExpanded = false
+    }
     var isFetchingModels by remember { mutableStateOf(false) }
     var fetchMessage by remember { mutableStateOf<String?>(null) }
     var fetchSuccess by remember { mutableStateOf(false) }
@@ -259,7 +272,15 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.height(8.dp))
             ExposedDropdownMenuBox(
                 expanded = providerExpanded,
-                onExpandedChange = { providerExpanded = !providerExpanded }
+                onExpandedChange = {
+                    providerExpanded = !providerExpanded
+                    if (providerExpanded) {
+                        modelExpanded = false
+                        groqModelExpanded = false
+                        baiModelExpanded = false
+                        customModelExpanded = false
+                    }
+                }
             ) {
                 MystTextField(
                     value = when (providerType) {
@@ -273,14 +294,13 @@ fun SettingsScreen(
                     
                     modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                 )
-                ExposedDropdownMenu(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    shape = RoundedCornerShape(10.dp),
+                MystExposedDropdownMenu(
                     expanded = providerExpanded,
                     onDismissRequest = { providerExpanded = false }
                 ) {
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.settings_provider_gemini)) },
+                    MystDropdownMenuItem(
+                        text = stringResource(R.string.settings_provider_gemini),
+                        isSelected = providerType == ProviderType.GEMINI,
                         onClick = {
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             providerType = ProviderType.GEMINI
@@ -288,8 +308,9 @@ fun SettingsScreen(
                             providerExpanded = false
                         }
                     )
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.settings_provider_groq)) },
+                    MystDropdownMenuItem(
+                        text = stringResource(R.string.settings_provider_groq),
+                        isSelected = providerType == ProviderType.GROQ,
                         onClick = {
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             providerType = ProviderType.GROQ
@@ -297,8 +318,9 @@ fun SettingsScreen(
                             providerExpanded = false
                         }
                     )
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.settings_provider_bai)) },
+                    MystDropdownMenuItem(
+                        text = stringResource(R.string.settings_provider_bai),
+                        isSelected = providerType == ProviderType.BAI,
                         onClick = {
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             providerType = ProviderType.BAI
@@ -306,8 +328,9 @@ fun SettingsScreen(
                             providerExpanded = false
                         }
                     )
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.settings_provider_custom)) },
+                    MystDropdownMenuItem(
+                        text = stringResource(R.string.settings_provider_custom),
+                        isSelected = providerType == ProviderType.CUSTOM,
                         onClick = {
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             providerType = ProviderType.CUSTOM
@@ -327,7 +350,15 @@ fun SettingsScreen(
                 Spacer(modifier = Modifier.height(8.dp))
                 ExposedDropdownMenuBox(
                     expanded = modelExpanded,
-                    onExpandedChange = { modelExpanded = !modelExpanded }
+                    onExpandedChange = {
+                        modelExpanded = !modelExpanded
+                        if (modelExpanded) {
+                            providerExpanded = false
+                            baiModelExpanded = false
+                            groqModelExpanded = false
+                            customModelExpanded = false
+                        }
+                    }
                 ) {
                     MystTextField(
                         value = GeminiModels.label(selectedModel),
@@ -336,15 +367,14 @@ fun SettingsScreen(
                         
                         modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                     )
-                    ExposedDropdownMenu(
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        shape = RoundedCornerShape(10.dp),
+                    MystExposedDropdownMenu(
                         expanded = modelExpanded,
                         onDismissRequest = { modelExpanded = false }
                     ) {
                         geminiModels.forEach { (id, label) ->
-                            DropdownMenuItem(
-                                text = { Text(label) },
+                            MystDropdownMenuItem(
+                                text = label,
+                                isSelected = selectedModel == id,
                                 onClick = {
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                     selectedModel = id
@@ -364,7 +394,15 @@ fun SettingsScreen(
                 Spacer(modifier = Modifier.height(8.dp))
                 ExposedDropdownMenuBox(
                     expanded = baiModelExpanded,
-                    onExpandedChange = { baiModelExpanded = !baiModelExpanded }
+                    onExpandedChange = {
+                        baiModelExpanded = !baiModelExpanded
+                        if (baiModelExpanded) {
+                            providerExpanded = false
+                            modelExpanded = false
+                            groqModelExpanded = false
+                            customModelExpanded = false
+                        }
+                    }
                 ) {
                     MystTextField(
                         value = BaiModels.label(baiModel),
@@ -373,15 +411,14 @@ fun SettingsScreen(
 
                         modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                     )
-                    ExposedDropdownMenu(
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        shape = RoundedCornerShape(10.dp),
+                    MystExposedDropdownMenu(
                         expanded = baiModelExpanded,
                         onDismissRequest = { baiModelExpanded = false }
                     ) {
                         baiModels.forEach { (id, label) ->
-                            DropdownMenuItem(
-                                text = { Text(label) },
+                            MystDropdownMenuItem(
+                                text = label,
+                                isSelected = baiModel == id,
                                 onClick = {
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                     baiModel = id
@@ -401,7 +438,15 @@ fun SettingsScreen(
                 Spacer(modifier = Modifier.height(8.dp))
                 ExposedDropdownMenuBox(
                     expanded = groqModelExpanded,
-                    onExpandedChange = { groqModelExpanded = !groqModelExpanded }
+                    onExpandedChange = {
+                        groqModelExpanded = !groqModelExpanded
+                        if (groqModelExpanded) {
+                            providerExpanded = false
+                            modelExpanded = false
+                            baiModelExpanded = false
+                            customModelExpanded = false
+                        }
+                    }
                 ) {
                     MystTextField(
                         value = GroqModels.label(groqModel),
@@ -410,15 +455,14 @@ fun SettingsScreen(
                         
                         modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                     )
-                    ExposedDropdownMenu(
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        shape = RoundedCornerShape(10.dp),
+                    MystExposedDropdownMenu(
                         expanded = groqModelExpanded,
                         onDismissRequest = { groqModelExpanded = false }
                     ) {
                         groqModels.forEach { (id, label) ->
-                            DropdownMenuItem(
-                                text = { Text(label) },
+                            MystDropdownMenuItem(
+                                text = label,
+                                isSelected = groqModel == id,
                                 onClick = {
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                     groqModel = id
@@ -480,7 +524,15 @@ fun SettingsScreen(
                 if (customModels.isNotEmpty()) {
                     ExposedDropdownMenuBox(
                         expanded = customModelExpanded,
-                        onExpandedChange = { customModelExpanded = !customModelExpanded }
+                        onExpandedChange = {
+                            customModelExpanded = !customModelExpanded
+                            if (customModelExpanded) {
+                                providerExpanded = false
+                                modelExpanded = false
+                                baiModelExpanded = false
+                                groqModelExpanded = false
+                            }
+                        }
                     ) {
                         MystTextField(
                             value = customModel,
@@ -498,15 +550,14 @@ fun SettingsScreen(
                             // restriction — cloud models and off-list ids stay typeable.
                             modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable)
                         )
-                        ExposedDropdownMenu(
-                            containerColor = MaterialTheme.colorScheme.surface,
-                            shape = RoundedCornerShape(10.dp),
+                        MystExposedDropdownMenu(
                             expanded = customModelExpanded,
                             onDismissRequest = { customModelExpanded = false }
                         ) {
                             customModels.forEach { id ->
-                                DropdownMenuItem(
-                                    text = { Text(id) },
+                                MystDropdownMenuItem(
+                                    text = id,
+                                    isSelected = customModel == id,
                                     onClick = {
                                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                         customModel = id

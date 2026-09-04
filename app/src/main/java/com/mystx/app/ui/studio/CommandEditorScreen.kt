@@ -2,6 +2,7 @@ package com.mystx.app.ui.studio
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -81,6 +82,12 @@ fun CommandEditorScreen(
 
     var modelOverride by rememberSaveable { mutableStateOf(initialCommand?.modelOverride ?: "") }
     var modelExpanded by remember { mutableStateOf(false) }
+
+    // Close any open dropdown before navigating back
+    BackHandler(enabled = categoryExpanded || modelExpanded) {
+        categoryExpanded = false
+        modelExpanded = false
+    }
 
     val globalTemp = prefs.getFloat(PrefKeys.TEMPERATURE, 0.5f)
     var temperature by rememberSaveable { mutableStateOf(initialCommand?.temperature ?: globalTemp) }
@@ -223,7 +230,10 @@ fun CommandEditorScreen(
             Spacer(modifier = Modifier.height(6.dp))
             ExposedDropdownMenuBox(
                 expanded = categoryExpanded,
-                onExpandedChange = { categoryExpanded = !categoryExpanded }
+                onExpandedChange = {
+                    categoryExpanded = !categoryExpanded
+                    if (categoryExpanded) modelExpanded = false
+                }
             ) {
                 MystTextField(
                     value = category.displayName,
@@ -231,15 +241,14 @@ fun CommandEditorScreen(
                     readOnly = true,
                     modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                 )
-                ExposedDropdownMenu(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    shape = RoundedCornerShape(10.dp),
+                MystExposedDropdownMenu(
                     expanded = categoryExpanded,
                     onDismissRequest = { categoryExpanded = false }
                 ) {
                     CommandCategory.EDITABLE_CATEGORIES.forEach { cat ->
-                        DropdownMenuItem(
-                            text = { Text(cat.displayName) },
+                        MystDropdownMenuItem(
+                            text = cat.displayName,
+                            isSelected = cat == category,
                             onClick = {
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 category = cat
@@ -292,7 +301,10 @@ fun CommandEditorScreen(
             Spacer(modifier = Modifier.height(6.dp))
             ExposedDropdownMenuBox(
                 expanded = modelExpanded,
-                onExpandedChange = { modelExpanded = !modelExpanded }
+                onExpandedChange = {
+                    modelExpanded = !modelExpanded
+                    if (modelExpanded) categoryExpanded = false
+                }
             ) {
                 val currentModelDisplay = if (modelOverride.isBlank() || modelOverride.equals("Global", ignoreCase = true)) {
                     stringResource(R.string.command_studio_model_global)
@@ -305,14 +317,14 @@ fun CommandEditorScreen(
                     readOnly = true,
                     modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                 )
-                ExposedDropdownMenu(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    shape = RoundedCornerShape(10.dp),
+                MystExposedDropdownMenu(
                     expanded = modelExpanded,
                     onDismissRequest = { modelExpanded = false }
                 ) {
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.command_studio_model_global)) },
+                    val isGlobalSelected = modelOverride.isBlank() || modelOverride.equals("Global", ignoreCase = true)
+                    MystDropdownMenuItem(
+                        text = stringResource(R.string.command_studio_model_global),
+                        isSelected = isGlobalSelected,
                         onClick = {
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             modelOverride = ""
@@ -320,8 +332,10 @@ fun CommandEditorScreen(
                         }
                     )
                     availableModels.forEach { (id, label) ->
-                        DropdownMenuItem(
-                            text = { Text(label) },
+                        val isSelected = !isGlobalSelected && modelOverride == id
+                        MystDropdownMenuItem(
+                            text = label,
+                            isSelected = isSelected,
                             onClick = {
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 modelOverride = id
