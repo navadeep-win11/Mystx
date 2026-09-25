@@ -26,7 +26,6 @@ import com.mystx.app.model.Command
 import com.mystx.app.model.CommandType
 import com.mystx.app.model.PromptPlaceholders
 import com.mystx.app.model.RichCommand
-import com.mystx.app.model.PrefKeys
 import com.mystx.app.ui.processtext.ProcessTextEdit
 import com.mystx.app.ui.processtext.ProcessTextReplacementBridge
 import com.mystx.app.ui.processtext.resolveProcessTextEdit
@@ -541,47 +540,17 @@ class AssistantService : AccessibilityService() {
 
                 when (outcome) {
                     is CommandOutcome.Success -> {
-                        val prefs = getSharedPreferences("settings", Context.MODE_PRIVATE)
-                        val previewMode = prefs.getBoolean(PrefKeys.PREVIEW_BEFORE_REPLACE, false)
-
-                        if (previewMode) {
-                            // Restore original text while preview is showing
-                            if (fieldWasAltered) replaceText(source, originalText)
-
-                            val accepted = kotlinx.coroutines.suspendCancellableCoroutine<Boolean> { cont ->
-                                val previewOverlay = PreviewOverlay(this@AssistantService)
-                                previewOverlay.show(outcome.text) { acc ->
-                                    if (cont.isActive) cont.resumeWith(Result.success(acc))
-                                }
-                                cont.invokeOnCancellation {
-                                    previewOverlay.dismiss()
-                                }
-                            }
-
-                            if (accepted) {
-                                if (!replaceText(source, outcome.text)) {
-                                    performHapticFeedback(HapticFeedbackConstants.REJECT)
-                                    showToast(getString(R.string.toast_replace_failed))
-                                } else {
-                                    lastOriginalText = originalText
-                                    lastUndoSourceId = sourceId(source)
-                                    performHapticFeedback(HapticFeedbackConstants.CONFIRM)
-                                    statsManager.recordUsage(command.trigger)
-                                }
-                            }
+                        if (!replaceText(source, outcome.text)) {
+                            // The field rejected the write. Restore the user's text, and don't
+                            // record an undo point or a CONFIRM haptic for text that never landed.
+                            replaceText(source, originalText)
+                            performHapticFeedback(HapticFeedbackConstants.REJECT)
+                            showToast(getString(R.string.toast_replace_failed))
                         } else {
-                            if (!replaceText(source, outcome.text)) {
-                                // The field rejected the write. Restore the user's text, and don't
-                                // record an undo point or a CONFIRM haptic for text that never landed.
-                                replaceText(source, originalText)
-                                performHapticFeedback(HapticFeedbackConstants.REJECT)
-                                showToast(getString(R.string.toast_replace_failed))
-                            } else {
-                                lastOriginalText = originalText
-                                lastUndoSourceId = sourceId(source)
-                                performHapticFeedback(HapticFeedbackConstants.CONFIRM)
-                                statsManager.recordUsage(command.trigger)
-                            }
+                            lastOriginalText = originalText
+                            lastUndoSourceId = sourceId(source)
+                            performHapticFeedback(HapticFeedbackConstants.CONFIRM)
+                            statsManager.recordUsage(command.trigger)
                         }
                     }
                     is CommandOutcome.Refusal -> {
