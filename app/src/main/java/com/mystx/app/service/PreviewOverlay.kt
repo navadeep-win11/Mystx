@@ -64,6 +64,7 @@ class PreviewOverlay(private val context: Context) {
                 this.text = text
                 setTextColor(Color.parseColor("#E0E0E0"))
                 textSize = 15f
+                setTextIsSelectable(true)
                 setLineSpacing(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4f, resources.displayMetrics), 1.0f)
             }
             scrollView.addView(textView)
@@ -111,11 +112,21 @@ class PreviewOverlay(private val context: Context) {
             buttonLayout.addView(btnAccept)
             layout.addView(buttonLayout)
 
+            layout.setOnTouchListener { _, event ->
+                if (event.action == android.view.MotionEvent.ACTION_OUTSIDE) {
+                    dismiss()
+                    onResult(false)
+                    true
+                } else {
+                    false
+                }
+            }
+
             val params = WindowManager.LayoutParams(
                 (context.resources.displayMetrics.widthPixels * 0.85).toInt(),
                 (context.resources.displayMetrics.heightPixels * 0.5).toInt(),
                 WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY,
-                WindowManager.LayoutParams.FLAG_DIM_BEHIND or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                WindowManager.LayoutParams.FLAG_DIM_BEHIND or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
                 PixelFormat.TRANSLUCENT
             ).apply {
                 gravity = Gravity.CENTER
