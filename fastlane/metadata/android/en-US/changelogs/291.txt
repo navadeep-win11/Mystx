@@ -1,0 +1,5 @@
+- fix: Suppress NonObservableLocale lint error in HistoryScreen
+- fix: Resolve build errors with DateRange import and duplicate Synchronized annotation
+- style: Overhaul UI to iOS white glassmorphism theme
+- feat: Add History Screen
+- feat: Add Token Saver History cache and QuickExplain movable popup
