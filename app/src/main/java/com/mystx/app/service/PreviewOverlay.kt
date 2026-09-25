@@ -115,7 +115,7 @@ class PreviewOverlay(private val context: Context) {
                 (context.resources.displayMetrics.widthPixels * 0.85).toInt(),
                 (context.resources.displayMetrics.heightPixels * 0.5).toInt(),
                 WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY,
-                WindowManager.LayoutParams.FLAG_DIM_BEHIND or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                WindowManager.LayoutParams.FLAG_DIM_BEHIND or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSLUCENT
             ).apply {
                 gravity = Gravity.CENTER

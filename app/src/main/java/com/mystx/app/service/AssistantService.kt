@@ -1151,12 +1151,10 @@ class AssistantService : AccessibilityService() {
                 val child = try { node.getChild(i) } catch (e: Exception) { null }
                 if (child != null) {
                     traverse(child)
-                    try { child.recycle() } catch (e: Exception) {}
                 }
             }
         }
         traverse(root)
-        try { root.recycle() } catch (e: Exception) {}
         return sb.toString().trim()
     }
 }
