@@ -26,6 +26,7 @@ import com.mystx.app.model.Command
 import com.mystx.app.model.CommandType
 import com.mystx.app.model.PromptPlaceholders
 import com.mystx.app.model.RichCommand
+import com.mystx.app.model.PrefKeys
 import com.mystx.app.ui.processtext.ProcessTextEdit
 import com.mystx.app.ui.processtext.ProcessTextReplacementBridge
 import com.mystx.app.ui.processtext.resolveProcessTextEdit
