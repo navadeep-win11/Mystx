@@ -86,7 +86,6 @@ object HistoryManager {
     }
 
     @Synchronized
-    @Synchronized
     fun getHistory(context: Context): List<HistoryItem> {
         loadHistory(context)
         return cachedHistory.toList()
