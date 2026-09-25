@@ -33,7 +33,7 @@ object PrefKeys {
 
     /** Epoch millis when structured output was last disabled (0 = never). */
     const val STRUCTURED_OUTPUT_DISABLED_AT = "structured_output_disabled_at"
-n    /** Language to use for Quick Explain popup responses. */
+    /** Language to use for Quick Explain popup responses. */
     const val EXPLAIN_LANGUAGE = "explain_language"
 
 }
