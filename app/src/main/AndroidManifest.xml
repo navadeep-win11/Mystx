@@ -70,6 +70,19 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".ui.processtext.QuickExplainActivity"
+            android:exported="true"
+            android:label="Mystx Explain"
+            android:excludeFromRecents="true"
+            android:theme="@style/Theme.Mystx.Dialog">
+            <intent-filter>
+                <action android:name="android.intent.action.PROCESS_TEXT" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/*" />
+            </intent-filter>
+        </activity>
+
         <service
             android:name=".service.AssistantService"
             android:exported="true"

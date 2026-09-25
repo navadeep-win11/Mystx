@@ -522,13 +522,18 @@ class AssistantService : AccessibilityService() {
                 )
                 val finalPrompt = PromptPlaceholders.render(finalPromptTemplate, placeholderContext)
 
-                val outcome = withTimeout(90_000) {
-                    runTextCommand(
-                        applicationContext, keyManager, client, openAIClient,
-                        finalPrompt, text,
-                        modelOverride = command.modelOverride,
-                        temperatureOverride = command.temperature
-                    ) { spinnerJob = startInlineSpinner(source, originalText) }
+                val cachedResponse = com.mystx.app.model.HistoryManager.findCachedResponse(applicationContext, originalText, command.trigger)
+                val outcome = if (cachedResponse != null) {
+                    CommandOutcome.Success(cachedResponse)
+                } else {
+                    withTimeout(90_000) {
+                        runTextCommand(
+                            applicationContext, keyManager, client, openAIClient,
+                            finalPrompt, text,
+                            modelOverride = command.modelOverride,
+                            temperatureOverride = command.temperature
+                        ) { spinnerJob = startInlineSpinner(source, originalText) }
+                    }
                 }
                 // From the first attempt onward the field holds the spinner glyph instead of the
                 // user's text, so every outcome below starts by taking it back out. No spinner
@@ -551,6 +556,7 @@ class AssistantService : AccessibilityService() {
                             lastUndoSourceId = sourceId(source)
                             performHapticFeedback(HapticFeedbackConstants.CONFIRM)
                             statsManager.recordUsage(command.trigger)
+                            com.mystx.app.model.HistoryManager.addEntry(applicationContext, originalText, command.trigger, outcome.text, false)
                         }
                     }
                     is CommandOutcome.Refusal -> {
