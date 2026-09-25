@@ -869,88 +869,109 @@ class AssistantService : AccessibilityService() {
         // must not restore or clear it — that destroyed the very clip the command just placed.
         callerOwnsClipboard: Boolean = false
     ): Boolean = withContext(Dispatchers.Main) {
-        if (!source.refresh()) return@withContext false
-        val bundle = Bundle()
-        bundle.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, newText)
+        var currentSource = source
+        var sourceIsOwned = false
 
-        val success = source.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, bundle)
+        fun refreshOrFallback(): Boolean {
+            if (currentSource.refresh()) return true
+            val fallback = findFocusedEditableSource()
+            if (fallback != null) {
+                if (sourceIsOwned && currentSource !== lastReplacedSource) currentSource.safeRecycle()
+                currentSource = fallback
+                sourceIsOwned = true
+                return true
+            }
+            return false
+        }
 
-        if (success) {
-            // Verify the text actually persisted — some apps (Firefox, Google Keep)
-            // return true but don't update their internal text state
-            delay(100)
-            if (!source.refresh()) {
-                // The node was recycled during the verification delay. Reading .text now
-                // would throw IllegalStateException; report the write as unverified and let
-                // the caller's failure path handle it instead of failing the replacement.
+        try {
+            if (!refreshOrFallback()) return@withContext false
+            val bundle = Bundle()
+            bundle.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, newText)
+
+            val success = currentSource.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, bundle)
+
+            if (success) {
+                // Verify the text actually persisted — some apps (Firefox, Google Keep)
+                // return true but don't update their internal text state
+                delay(100)
+                if (!refreshOrFallback()) {
+                    // The node was recycled during the verification delay. Reading .text now
+                    // would throw IllegalStateException; report the write as unverified and let
+                    // the caller's failure path handle it instead of failing the replacement.
+                    return@withContext false
+                }
+                val currentText = currentSource.text?.toString()
+                if (currentText == newText) {
+                    scheduleTextVerification(currentSource, newText)
+                    return@withContext true // Text persisted
+                }
+                // Some editors (WebView-based, Samsung Notes, Keep) accept ACTION_SET_TEXT but
+                // commit asynchronously — give them one longer window before declaring the write
+                // ignored, so note-apps don't get a spurious clipboard fallback (#125).
+                delay(400)
+                if (!refreshOrFallback()) return@withContext false
+                val settledText = currentSource.text?.toString()
+                if (settledText == newText) {
+                    scheduleTextVerification(currentSource, newText)
+                    return@withContext true // Text persisted late
+                }
+                // Text didn't persist, fall through to clipboard fallback
+            }
+
+            // Clipboard fallback: select all + paste (goes through app's input pipeline)
+            val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val oldClip = clipboard.primaryClip
+            val newClip = ClipData.newPlainText("Mystx Result", newText)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                newClip.description.extras = android.os.PersistableBundle().apply {
+                    putBoolean("android.content.extra.IS_SENSITIVE", true)
+                }
+            }
+            clipboard.setPrimaryClip(newClip)
+
+            if (!refreshOrFallback() || currentSource.text == null) {
+                // We already replaced the clipboard above; bail out without leaving our temp clip
+                // (which holds the transformed text) as the user's clipboard.
+                if (!callerOwnsClipboard) restoreClipboard(clipboard, oldClip, newText)
                 return@withContext false
             }
-            val currentText = source.text?.toString()
-            if (currentText == newText) {
-                scheduleTextVerification(source, newText)
-                return@withContext true // Text persisted
-            }
-            // Some editors (WebView-based, Samsung Notes, Keep) accept ACTION_SET_TEXT but
-            // commit asynchronously — give them one longer window before declaring the write
-            // ignored, so note-apps don't get a spurious clipboard fallback (#125).
-            delay(400)
-            if (!source.refresh()) return@withContext false
-            val settledText = source.text?.toString()
-            if (settledText == newText) {
-                scheduleTextVerification(source, newText)
-                return@withContext true // Text persisted late
-            }
-            // Text didn't persist, fall through to clipboard fallback
-        }
+            val selectAllArgs = Bundle()
+            selectAllArgs.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_START_INT, 0)
+            selectAllArgs.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_END_INT, currentSource.text?.length ?: 0)
+            currentSource.performAction(AccessibilityNodeInfo.ACTION_SET_SELECTION, selectAllArgs)
 
-        // Clipboard fallback: select all + paste (goes through app's input pipeline)
-        val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        val oldClip = clipboard.primaryClip
-        val newClip = ClipData.newPlainText("Mystx Result", newText)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            newClip.description.extras = android.os.PersistableBundle().apply {
-                putBoolean("android.content.extra.IS_SENSITIVE", true)
-            }
-        }
-        clipboard.setPrimaryClip(newClip)
+            val pasted = currentSource.performAction(AccessibilityNodeInfo.ACTION_PASTE)
 
-        if (!source.refresh() || source.text == null) {
-            // We already replaced the clipboard above; bail out without leaving our temp clip
-            // (which holds the transformed text) as the user's clipboard.
-            if (!callerOwnsClipboard) restoreClipboard(clipboard, oldClip, newText)
-            return@withContext false
-        }
-        val selectAllArgs = Bundle()
-        selectAllArgs.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_START_INT, 0)
-        selectAllArgs.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_END_INT, source.text?.length ?: 0)
-        source.performAction(AccessibilityNodeInfo.ACTION_SET_SELECTION, selectAllArgs)
+            scheduleTextVerification(currentSource, newText)
 
-        val pasted = source.performAction(AccessibilityNodeInfo.ACTION_PASTE)
-
-        scheduleTextVerification(source, newText)
-
-        if (!callerOwnsClipboard) {
-            // Deliberately does NOT touch `source`: scheduleTextVerification recycles the node
-            // at +300ms, so source.refresh() here threw IllegalStateException on API < 33.
-            // pendingClipRestore lets onInterrupt/onDestroy run this synchronously — both flush
-            // the handler, which previously cancelled it and left Mystx's temp clip (the
-            // transformed text) as the user's clipboard indefinitely.
-            val currentPending = Triple(clipboard, oldClip, newText)
-            pendingClipRestore = currentPending
-            handler.postDelayed({
-                try {
-                    restoreClipboard(clipboard, oldClip, newText)
-                } catch (_: Exception) {
-                } finally {
-                    if (pendingClipRestore === currentPending) {
-                        pendingClipRestore = null
+            if (!callerOwnsClipboard) {
+                // Deliberately does NOT touch `source`: scheduleTextVerification recycles the node
+                // at +300ms, so source.refresh() here threw IllegalStateException on API < 33.
+                // pendingClipRestore lets onInterrupt/onDestroy run this synchronously — both flush
+                // the handler, which previously cancelled it and left Mystx's temp clip (the
+                // transformed text) as the user's clipboard indefinitely.
+                val currentPending = Triple(clipboard, oldClip, newText)
+                pendingClipRestore = currentPending
+                handler.postDelayed({
+                    try {
+                        restoreClipboard(clipboard, oldClip, newText)
+                    } catch (_: Exception) {
+                    } finally {
+                        if (pendingClipRestore === currentPending) {
+                            pendingClipRestore = null
+                        }
                     }
-                }
-            }, 500)
+                }, 500)
+            }
+            // Report what the paste action actually returned. Returning an unconditional true here
+            // silently defeated every caller's failure check.
+            pasted
+        } finally {
+            if (sourceIsOwned && currentSource !== lastReplacedSource) {
+                currentSource.safeRecycle()
+            }
         }
-        // Report what the paste action actually returned. Returning an unconditional true here
-        // silently defeated every caller's failure check.
-        pasted
     }
 
     /**
