@@ -58,6 +58,7 @@ enum class Tab(@param:StringRes val titleRes: Int, val icon: ImageVector) {
     Dashboard(R.string.dashboard_title, Icons.Default.Home),
     Keys(R.string.keys_title, Icons.Default.Lock),
     Commands(R.string.command_studio_title, Icons.AutoMirrored.Filled.List),
+    History(R.string.history_title, Icons.Default.DateRange),
     Settings(R.string.settings_title, Icons.Default.Settings)
 }
 
@@ -184,6 +185,9 @@ fun MystxMainScreen(vm: MystxViewModel = viewModel()) {
                     }
                     selectedTab == Tab.Dashboard -> {
                         DashboardScreen(vm.keyManager, vm.commandManager, vm.statsManager)
+                    }
+                    selectedTab == Tab.History -> {
+                        com.mystx.app.ui.HistoryScreen()
                     }
                     selectedTab == Tab.Keys -> {
                         KeysScreen(vm.keyManager, vm.prefs)

@@ -86,6 +86,12 @@ object HistoryManager {
     }
 
     @Synchronized
+    @Synchronized
+    fun getHistory(context: Context): List<HistoryItem> {
+        loadHistory(context)
+        return cachedHistory.toList()
+    }
+
     fun findCachedResponse(context: Context, originalText: String, commandTrigger: String): String? {
         loadHistory(context)
         // Only fetch cache for non-selection (keyboard typed) items

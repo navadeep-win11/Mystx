@@ -194,4 +194,5 @@
     <string name="command_studio_reset_confirm_title">Reset built-in command?</string>
     <string name="command_studio_reset_confirm_msg">Revert prompt template, model and settings to default?</string>
     <string name="command_studio_empty_search">No commands match your filter</string>
+    <string name="history_title">History</string>
 </resources>
