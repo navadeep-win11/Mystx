@@ -1,0 +1,2 @@
+- style: Switch UI back to Dark Theme (iOS Dark Glass) and force Explain popup to top of context menu
+- fix: Add explicit string labels to PROCESS_TEXT intent filters to prevent duplicate Mystx menu items on MIUI/Custom ROMs
