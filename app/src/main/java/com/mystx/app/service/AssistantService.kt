@@ -338,7 +338,8 @@ class AssistantService : AccessibilityService() {
                 }
             }
             CommandType.AI -> {
-                if (cleanText.isEmpty()) {
+                val requiresInputText = cleanText.isEmpty() && !richCommand.trigger.endsWith("reply") && !richCommand.promptTemplate.contains("{screen_text}")
+                if (requiresInputText) {
                     source.safeRecycle()
                     return
                 }
@@ -498,14 +499,28 @@ class AssistantService : AccessibilityService() {
             try {
                 val lang = PromptPlaceholders.languageFromTrigger(command.trigger)
                 val appPackage = source.packageName?.toString()
+                
+                val needsScreenText = command.promptTemplate.contains("{screen_text}") || command.trigger.endsWith("reply")
+                val screenTextStr = if (needsScreenText) {
+                    val root = try { rootInActiveWindow } catch (e: Exception) { null }
+                    extractScreenText(root, source)
+                } else null
+
+                val finalPromptTemplate = if (command.trigger.endsWith("reply") && !command.promptTemplate.contains("{screen_text}")) {
+                    command.promptTemplate + "\n\nContext from screen:\n{screen_text}"
+                } else {
+                    command.promptTemplate
+                }
+
                 val placeholderContext = PromptPlaceholders.Context(
                     text = text,
                     language = lang,
                     tone = null,
                     instruction = null,
-                    app = appPackage
+                    app = appPackage,
+                    screenText = screenTextStr
                 )
-                val finalPrompt = PromptPlaceholders.render(command.promptTemplate, placeholderContext)
+                val finalPrompt = PromptPlaceholders.render(finalPromptTemplate, placeholderContext)
 
                 val outcome = withTimeout(90_000) {
                     runTextCommand(
@@ -525,17 +540,47 @@ class AssistantService : AccessibilityService() {
 
                 when (outcome) {
                     is CommandOutcome.Success -> {
-                        if (!replaceText(source, outcome.text)) {
-                            // The field rejected the write. Restore the user's text, and don't
-                            // record an undo point or a CONFIRM haptic for text that never landed.
-                            replaceText(source, originalText)
-                            performHapticFeedback(HapticFeedbackConstants.REJECT)
-                            showToast(getString(R.string.toast_replace_failed))
+                        val prefs = getSharedPreferences("settings", Context.MODE_PRIVATE)
+                        val previewMode = prefs.getBoolean(PrefKeys.PREVIEW_BEFORE_REPLACE, false)
+
+                        if (previewMode) {
+                            // Restore original text while preview is showing
+                            if (fieldWasAltered) replaceText(source, originalText)
+
+                            val accepted = kotlinx.coroutines.suspendCancellableCoroutine<Boolean> { cont ->
+                                val previewOverlay = PreviewOverlay(this@AssistantService)
+                                previewOverlay.show(outcome.text) { acc ->
+                                    if (cont.isActive) cont.resumeWith(Result.success(acc))
+                                }
+                                cont.invokeOnCancellation {
+                                    previewOverlay.dismiss()
+                                }
+                            }
+
+                            if (accepted) {
+                                if (!replaceText(source, outcome.text)) {
+                                    performHapticFeedback(HapticFeedbackConstants.REJECT)
+                                    showToast(getString(R.string.toast_replace_failed))
+                                } else {
+                                    lastOriginalText = originalText
+                                    lastUndoSourceId = sourceId(source)
+                                    performHapticFeedback(HapticFeedbackConstants.CONFIRM)
+                                    statsManager.recordUsage(command.trigger)
+                                }
+                            }
                         } else {
-                            lastOriginalText = originalText
-                            lastUndoSourceId = sourceId(source)
-                            performHapticFeedback(HapticFeedbackConstants.CONFIRM)
-                            statsManager.recordUsage(command.trigger)
+                            if (!replaceText(source, outcome.text)) {
+                                // The field rejected the write. Restore the user's text, and don't
+                                // record an undo point or a CONFIRM haptic for text that never landed.
+                                replaceText(source, originalText)
+                                performHapticFeedback(HapticFeedbackConstants.REJECT)
+                                showToast(getString(R.string.toast_replace_failed))
+                            } else {
+                                lastOriginalText = originalText
+                                lastUndoSourceId = sourceId(source)
+                                performHapticFeedback(HapticFeedbackConstants.CONFIRM)
+                                statsManager.recordUsage(command.trigger)
+                            }
                         }
                     }
                     is CommandOutcome.Refusal -> {
@@ -1085,5 +1130,32 @@ class AssistantService : AccessibilityService() {
         handler.removeCallbacksAndMessages(null)
         overlayToast.dismiss()
         serviceScope.cancel()
+    }
+
+    private fun extractScreenText(root: AccessibilityNodeInfo?, skipNode: AccessibilityNodeInfo?): String {
+        if (root == null) return ""
+        val sb = java.lang.StringBuilder()
+        val visited = mutableSetOf<AccessibilityNodeInfo>()
+
+        fun traverse(node: AccessibilityNodeInfo) {
+            if (!visited.add(node)) return
+            if (node == skipNode) return
+            if (node.isVisibleToUser) {
+                val nodeText = node.text?.toString()?.trim() ?: node.contentDescription?.toString()?.trim()
+                if (!nodeText.isNullOrBlank()) {
+                    sb.append(nodeText).append("\n")
+                }
+            }
+            for (i in 0 until node.childCount) {
+                val child = try { node.getChild(i) } catch (e: Exception) { null }
+                if (child != null) {
+                    traverse(child)
+                    try { child.recycle() } catch (e: Exception) {}
+                }
+            }
+        }
+        traverse(root)
+        try { root.recycle() } catch (e: Exception) {}
+        return sb.toString().trim()
     }
 }

@@ -33,4 +33,7 @@ object PrefKeys {
 
     /** Epoch millis when structured output was last disabled (0 = never). */
     const val STRUCTURED_OUTPUT_DISABLED_AT = "structured_output_disabled_at"
+
+    /** Whether to show a preview popup before replacing text. */
+    const val PREVIEW_BEFORE_REPLACE = "preview_before_replace"
 }

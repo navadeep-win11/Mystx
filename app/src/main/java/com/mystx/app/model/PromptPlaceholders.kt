@@ -24,15 +24,17 @@ object PromptPlaceholders {
     const val TONE = "tone"
     const val INSTRUCTION = "instruction"
     const val APP = "app"
+    const val SCREEN_TEXT = "screen_text"
 
-    val ALL = listOf(TEXT, LANGUAGE, TONE, INSTRUCTION, APP)
+    val ALL = listOf(TEXT, LANGUAGE, TONE, INSTRUCTION, APP, SCREEN_TEXT)
 
     data class Context(
         val text: String,
         val language: String? = null,
         val tone: String? = null,
         val instruction: String? = null,
-        val app: String? = null
+        val app: String? = null,
+        val screenText: String? = null
     )
 
     private fun token(name: String) = "{$name}"
@@ -45,6 +47,7 @@ object PromptPlaceholders {
             .replace(token(TONE), context.tone ?: "")
             .replace(token(INSTRUCTION), context.instruction ?: "")
             .replace(token(APP), context.app ?: "")
+            .replace(token(SCREEN_TEXT), context.screenText ?: "")
         out = out.replace(Regex("[ \\t]*\\n[ \\t]*\\n[ \\t]*\\n+"), "\n\n").trim()
         return out
     }

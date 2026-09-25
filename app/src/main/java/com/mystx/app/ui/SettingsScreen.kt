@@ -681,6 +681,49 @@ fun SettingsScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
+        var previewBeforeReplace by remember { mutableStateOf(prefs.getBoolean(PrefKeys.PREVIEW_BEFORE_REPLACE, false)) }
+        MystCard {
+            Row(
+                modifier = Modifier.fillMaxWidth().clickable {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    previewBeforeReplace = !previewBeforeReplace
+                    prefs.edit().putBoolean(PrefKeys.PREVIEW_BEFORE_REPLACE, previewBeforeReplace).apply()
+                }.padding(vertical = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Preview Before Replace",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Show a popup to review AI generated text before modifying the current text field.",
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(end = 16.dp)
+                    )
+                }
+                Switch(
+                    checked = previewBeforeReplace,
+                    onCheckedChange = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        previewBeforeReplace = it
+                        prefs.edit().putBoolean(PrefKeys.PREVIEW_BEFORE_REPLACE, it).apply()
+                    },
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
+                        checkedTrackColor = MaterialTheme.colorScheme.primary
+                    )
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
         // Card 3: Backup
         MystCard {
             Text(
