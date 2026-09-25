@@ -56,6 +56,8 @@
     <string name="settings_provider_bai">B.ai</string>
     <string name="settings_provider_custom">Custom (OpenAI Compatible)</string>
     <string name="settings_model_title">Model</string>
+    <string name="settings_explain_language_title">Explain Language</string>
+    <string name="settings_explain_language_desc">Language for Mystx Explain popup responses.</string>
     <string name="settings_temperature_title">Temperature</string>
     <string name="settings_endpoint_title">Endpoint</string>
     <string name="settings_endpoint_placeholder">https://api.example.com/v1</string>

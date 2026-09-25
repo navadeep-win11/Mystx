@@ -113,6 +113,8 @@ fun SettingsScreen(
 
     var triggerPrefix by remember { mutableStateOf(commandManager.getTriggerPrefix()) }
     var prefixError by remember { mutableStateOf<String?>(null) }
+    var explainLanguage by remember { mutableStateOf(prefs.getString(PrefKeys.EXPLAIN_LANGUAGE, "Tenglish") ?: "Tenglish") }
+    var saveLangJob by remember { mutableStateOf<Job?>(null) }
     var temperature by remember { mutableStateOf(prefs.getFloat(PrefKeys.TEMPERATURE, 0.5f)) }
 
     val prefixErrorLength = stringResource(R.string.settings_prefix_error_length)
@@ -634,6 +636,44 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.height(4.dp))
         }
 
+        Spacer(modifier = Modifier.height(8.dp))
+
+        
+        // Card: Explain Language
+        MystCard {
+            Text(
+                text = stringResource(R.string.settings_explain_language_title),
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = stringResource(R.string.settings_explain_language_desc),
+                fontSize = 13.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            MystTextField(
+                value = explainLanguage,
+                onValueChange = {
+                    explainLanguage = it
+                    saveLangJob?.cancel()
+                    saveLangJob = scope.launch {
+                        delay(500)
+                        prefs.edit().putString(PrefKeys.EXPLAIN_LANGUAGE, it.ifBlank { "Tenglish" }).apply()
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "e.g., Tenglish, English, Hindi, Henglish, Taimenglish...",
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+            )
+        }
+        
         Spacer(modifier = Modifier.height(8.dp))
 
         // Card 2: Trigger Prefix

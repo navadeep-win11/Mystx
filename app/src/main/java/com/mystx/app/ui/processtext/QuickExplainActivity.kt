@@ -31,6 +31,8 @@ import com.mystx.app.R
 import com.mystx.app.service.CommandOutcome
 import com.mystx.app.api.GeminiClient
 import com.mystx.app.model.HistoryManager
+import com.mystx.app.model.PrefKeys
+import android.content.Context
 import com.mystx.app.manager.KeyManager
 import com.mystx.app.api.OpenAICompatibleClient
 import com.mystx.app.service.runTextCommand
@@ -89,13 +91,16 @@ fun QuickExplainScreen(selectedText: String, onClose: () -> Unit, onDrag: (Float
             val openAIClient = OpenAICompatibleClient()
 
             // Construct specific prompt
+            val prefs = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
+            val lang = prefs.getString(PrefKeys.EXPLAIN_LANGUAGE, "Tenglish") ?: "Tenglish"
+            
             val prompt = """
                 Analyze the following text:
                 "${selectedText}"
                 
                 If it is a single word or short phrase, provide its meaning and a simple example sentence.
                 If it is a question, provide a concise answer.
-                Please respond in Tenglish (Telugu written in English script) or English as appropriate.
+                Please respond natively in ${lang}.
             """.trimIndent()
 
             val outcome = runTextCommand(
