@@ -1,0 +1,3 @@
+- fix: Prevent orphaned preview overlay on service interrupt
+- fix: Polish preview overlay (text selection, outside touch dismiss)
+- fix: Fix preview disappearing instantly and reply command crashing
