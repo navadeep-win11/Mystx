@@ -5,6 +5,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
@@ -69,20 +70,39 @@ private val IosDarkColorScheme = darkColorScheme(
     errorContainer = Color(0xFF4D1511)
 )
 
+private val IosLightColorScheme = lightColorScheme(
+    background = Color(0xFFF2F2F7), // iOS grouped background light
+    surface = Color(0xB3FFFFFF),    // frosted white glass
+    surfaceVariant = Color(0x80FFFFFF),
+    surfaceContainerHigh = Color(0xE6FFFFFF),
+    onBackground = Color(0xFF000000),
+    onSurface = Color(0xFF000000),
+    onSurfaceVariant = Color(0xFF3C3C43).copy(alpha = 0.6f), // iOS secondary text light
+    outline = Color(0x33000000),          // very subtle dark border
+    primary = Color(0xFF007AFF),          // iOS blue light
+    onPrimary = Color(0xFFFFFFFF),
+    primaryContainer = Color(0xFFE5F1FF),
+    onPrimaryContainer = Color(0xFF004080),
+    secondary = Color(0xFF34C759),        // iOS green light
+    tertiary = Color(0xFFFF9500),         // iOS orange light
+    tertiaryContainer = Color(0xFFFFEAD1),
+    error = Color(0xFFFF3B30),            // iOS red light
+    errorContainer = Color(0xFFFFD8D6)
+)
+
 @Composable
 fun MystxTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    forceLight: Boolean = false,
     content: @Composable () -> Unit
 ) {
-    // Force dark iOS theme
-    val colorScheme = IosDarkColorScheme
+    val colorScheme = if (forceLight) IosLightColorScheme else IosDarkColorScheme
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
             val activity = view.context as? Activity ?: return@SideEffect
             val controller = WindowCompat.getInsetsController(activity.window, view)
-            controller.isAppearanceLightStatusBars = false
-            controller.isAppearanceLightNavigationBars = false
+            controller.isAppearanceLightStatusBars = forceLight
+            controller.isAppearanceLightNavigationBars = forceLight
         }
     }
 

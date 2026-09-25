@@ -58,7 +58,7 @@ class QuickExplainActivity : ComponentActivity() {
         window.setGravity(android.view.Gravity.CENTER)
 
         setContent {
-            MystxTheme {
+            MystxTheme(forceLight = true) {
                 QuickExplainScreen(
                     selectedText = selectedText,
                     onClose = { finish() },
