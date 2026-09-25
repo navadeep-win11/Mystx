@@ -1,0 +1,1 @@
+- fix: Make replaceText robust against node invalidation to fix restore issues
