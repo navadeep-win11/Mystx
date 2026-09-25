@@ -1,0 +1,1 @@
+- fix: Rename text selection labels to mystx1 and mystx2 per user request
