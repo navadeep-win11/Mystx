@@ -1,7 +1,6 @@
 package com.mystx.app.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
@@ -12,21 +11,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.mystx.app.ui.theme.MystAqua
-import com.mystx.app.ui.theme.MystTeal
 
 /**
- * Ambient aurora behind every screen: deep abyss base with three soft light
- * fields (cyan top-left, teal bottom-right, faint teal center-right). The
- * translucent glass surfaces in the theme pick this up and read as frosted
- * glass. Pure gradient painting — no blur hardware needed, smooth on API 23+.
+ * iOS-style dynamic light blur background.
+ * Smooth pastel gradient mesh mimicking the iOS wallpaper feel behind white frosted glass.
  */
 @Composable
 fun MystAuroraBackdrop(modifier: Modifier = Modifier) {
-    val dark = isSystemInDarkTheme()
-    val baseTop = if (dark) Color(0xFF07131A) else Color(0xFFF0FAF8)
-    val baseBottom = if (dark) Color(0xFF102831) else Color(0xFFDFF3EE)
-    val blobAlpha = if (dark) 0.30f else 0.26f
+    val baseTop = Color(0xFFF0F4F8)
+    val baseBottom = Color(0xFFE8EEF2)
+    val blobAlpha = 0.6f
 
     Box(
         modifier = modifier
@@ -36,33 +30,33 @@ fun MystAuroraBackdrop(modifier: Modifier = Modifier) {
         Box(
             modifier = Modifier
                 .align(Alignment.TopStart)
-                .offset(x = (-90).dp, y = (-70).dp)
-                .size(340.dp)
+                .offset(x = (-80).dp, y = (-50).dp)
+                .size(400.dp)
                 .background(
                     Brush.radialGradient(
-                        listOf(MystAqua.copy(alpha = blobAlpha), Color.Transparent)
+                        listOf(Color(0xFFE2F0FF).copy(alpha = blobAlpha), Color.Transparent)
                     )
                 )
         )
         Box(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .offset(x = 70.dp, y = 90.dp)
-                .size(380.dp)
+                .offset(x = 100.dp, y = 100.dp)
+                .size(450.dp)
                 .background(
                     Brush.radialGradient(
-                        listOf(MystTeal.copy(alpha = blobAlpha), Color.Transparent)
+                        listOf(Color(0xFFFFE5E5).copy(alpha = blobAlpha), Color.Transparent)
                     )
                 )
         )
         Box(
             modifier = Modifier
                 .align(Alignment.CenterEnd)
-                .offset(x = 130.dp)
-                .size(220.dp)
+                .offset(x = 150.dp)
+                .size(300.dp)
                 .background(
                     Brush.radialGradient(
-                        listOf(MystAqua.copy(alpha = blobAlpha * 0.45f), Color.Transparent)
+                        listOf(Color(0xFFE5FFED).copy(alpha = blobAlpha), Color.Transparent)
                     )
                 )
         )
