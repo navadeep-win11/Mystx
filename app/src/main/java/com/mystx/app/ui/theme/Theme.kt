@@ -4,7 +4,7 @@ import android.app.Activity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
-import androidx.compose.material3.lightColorScheme
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
@@ -15,9 +15,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.core.view.WindowCompat
 import com.mystx.app.R
 
-val MystAqua = Color(0xFF007AFF) // iOS Blue
-val MystTeal = Color(0xFF0A84FF) // iOS Blue secondary
-val MystAmber = Color(0xFFFF9500) // iOS Orange
+val MystAqua = Color(0xFF0A84FF) // iOS Blue Dark
+val MystTeal = Color(0xFF007AFF) // iOS Blue secondary
+val MystAmber = Color(0xFFFF9F0A) // iOS Orange Dark
 
 fun mystBrandGradient() = listOf(MystAqua, MystTeal)
 
@@ -49,24 +49,24 @@ private fun mystTypography(): Typography {
     )
 }
 
-private val IosLightColorScheme = lightColorScheme(
-    background = Color(0xFFF2F2F7), // iOS grouped background
-    surface = Color(0xCCFFFFFF),    // frosted white glass
-    surfaceVariant = Color(0xE6FFFFFF), // highly opaque white glass
-    surfaceContainerHigh = Color(0x80FFFFFF),
-    onBackground = Color(0xFF000000),
-    onSurface = Color(0xFF000000),
-    onSurfaceVariant = Color(0xFF8E8E93), // iOS secondary text
-    outline = Color(0x1A000000),          // very subtle light gray border
-    primary = Color(0xFF007AFF),          // iOS blue
+private val IosDarkColorScheme = darkColorScheme(
+    background = Color(0xFF000000), // Pure black background
+    surface = Color(0x33FFFFFF),    // Frosted dark glass
+    surfaceVariant = Color(0x26FFFFFF),
+    surfaceContainerHigh = Color(0x40FFFFFF),
+    onBackground = Color(0xFFFFFFFF),
+    onSurface = Color(0xFFFFFFFF),
+    onSurfaceVariant = Color(0x99EBEBF5), // iOS secondary text dark
+    outline = Color(0x33FFFFFF),          // very subtle light border
+    primary = Color(0xFF0A84FF),          // iOS blue dark
     onPrimary = Color(0xFFFFFFFF),
-    primaryContainer = Color(0xFFE5F1FF),
-    onPrimaryContainer = Color(0xFF004080),
-    secondary = Color(0xFF34C759),        // iOS green
-    tertiary = Color(0xFFFF9500),         // iOS orange
-    tertiaryContainer = Color(0xFFFFECCC),
-    error = Color(0xFFFF3B30),            // iOS red
-    errorContainer = Color(0xFFFFEBEB)
+    primaryContainer = Color(0xFF004080),
+    onPrimaryContainer = Color(0xFFE5F1FF),
+    secondary = Color(0xFF30D158),        // iOS green dark
+    tertiary = Color(0xFFFF9F0A),         // iOS orange dark
+    tertiaryContainer = Color(0xFF4D2F00),
+    error = Color(0xFFFF453A),            // iOS red dark
+    errorContainer = Color(0xFF4D1511)
 )
 
 @Composable
@@ -74,15 +74,15 @@ fun MystxTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    // Force light iOS theme regardless of system dark mode
-    val colorScheme = IosLightColorScheme
+    // Force dark iOS theme
+    val colorScheme = IosDarkColorScheme
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
             val activity = view.context as? Activity ?: return@SideEffect
             val controller = WindowCompat.getInsetsController(activity.window, view)
-            controller.isAppearanceLightStatusBars = true
-            controller.isAppearanceLightNavigationBars = true
+            controller.isAppearanceLightStatusBars = false
+            controller.isAppearanceLightNavigationBars = false
         }
     }
 

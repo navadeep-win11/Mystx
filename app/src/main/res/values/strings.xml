@@ -196,5 +196,5 @@
     <string name="command_studio_empty_search">No commands match your filter</string>
     <string name="history_title">History</string>
     <string name="mystx_commands">Mystx Commands</string>
-    <string name="mystx_explain">Mystx Explain</string>
+    <string name="mystx_explain"> Mystx Explain</string>
 </resources>

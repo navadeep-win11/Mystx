@@ -13,14 +13,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 /**
- * iOS-style dynamic light blur background.
- * Smooth pastel gradient mesh mimicking the iOS wallpaper feel behind white frosted glass.
+ * iOS-style dynamic dark blur background.
+ * Smooth deep gradient mesh mimicking the iOS wallpaper feel behind dark frosted glass.
  */
 @Composable
 fun MystAuroraBackdrop(modifier: Modifier = Modifier) {
-    val baseTop = Color(0xFFF0F4F8)
-    val baseBottom = Color(0xFFE8EEF2)
-    val blobAlpha = 0.6f
+    val baseTop = Color(0xFF000000)
+    val baseBottom = Color(0xFF0F0F13)
+    val blobAlpha = 0.5f
 
     Box(
         modifier = modifier
@@ -34,7 +34,7 @@ fun MystAuroraBackdrop(modifier: Modifier = Modifier) {
                 .size(400.dp)
                 .background(
                     Brush.radialGradient(
-                        listOf(Color(0xFFE2F0FF).copy(alpha = blobAlpha), Color.Transparent)
+                        listOf(Color(0xFF0A2B4C).copy(alpha = blobAlpha), Color.Transparent)
                     )
                 )
         )
@@ -45,7 +45,7 @@ fun MystAuroraBackdrop(modifier: Modifier = Modifier) {
                 .size(450.dp)
                 .background(
                     Brush.radialGradient(
-                        listOf(Color(0xFFFFE5E5).copy(alpha = blobAlpha), Color.Transparent)
+                        listOf(Color(0xFF2A0A3A).copy(alpha = blobAlpha), Color.Transparent)
                     )
                 )
         )
@@ -56,7 +56,7 @@ fun MystAuroraBackdrop(modifier: Modifier = Modifier) {
                 .size(300.dp)
                 .background(
                     Brush.radialGradient(
-                        listOf(Color(0xFFE5FFED).copy(alpha = blobAlpha), Color.Transparent)
+                        listOf(Color(0xFF003020).copy(alpha = blobAlpha), Color.Transparent)
                     )
                 )
         )
