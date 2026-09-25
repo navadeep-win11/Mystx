@@ -1,0 +1,1 @@
+- style: Use iOS Light Theme specifically for QuickExplain popup while keeping main app dark
