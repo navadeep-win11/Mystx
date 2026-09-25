@@ -152,12 +152,17 @@ class PreviewOverlay(private val context: Context) {
     }
 
     fun dismiss() {
-        handler.post {
+        val action = Runnable {
             currentView?.let {
                 val wm = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
                 try { wm.removeView(it) } catch (e: Exception) {}
                 currentView = null
             }
+        }
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            action.run()
+        } else {
+            handler.post(action)
         }
     }
 }
