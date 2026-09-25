@@ -1,0 +1,1 @@
+- feat: Add Token Saver History cache and QuickExplain movable popup
