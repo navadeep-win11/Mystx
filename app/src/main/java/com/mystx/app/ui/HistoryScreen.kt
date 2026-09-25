@@ -18,6 +18,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+@android.annotation.SuppressLint("NonObservableLocale")
 @Composable
 fun HistoryScreen() {
     val context = LocalContext.current
@@ -63,6 +64,7 @@ fun HistoryScreen() {
     }
 }
 
+@android.annotation.SuppressLint("NonObservableLocale")
 @Composable
 private fun HistoryItemCard(item: HistoryManager.HistoryItem) {
     MystCard {
