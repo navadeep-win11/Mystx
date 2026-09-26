@@ -1,0 +1,1 @@
+- feat: Add text/plain and ACTION_SEND intent filters to support PDF readers and WebViews
