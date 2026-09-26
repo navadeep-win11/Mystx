@@ -1,0 +1,1 @@
+- fix: Workflow grep error and bump baseVersion to 2.0
