@@ -92,7 +92,7 @@ class ProcessTextActivity : ComponentActivity() {
         }
 
         setContent {
-            MystxTheme {
+            MystxTheme(forceLight = true) {
                 ProcessTextRoot(
                     selection = selection,
                     rejectionMessage = rejectionMessage,

@@ -75,7 +75,7 @@ class CommandManager(context: Context) {
         "expand" to "Rewrite with more detail. Elaborate only on what is stated or widely known \u2014 do not fabricate information.",
         "formal" to "Rewrite in a formal, professional tone.",
         "casual" to "Rewrite in a casual, friendly tone.",
-        "emoji" to "Add relevant emojis throughout.",
+        "emoji" to "Rewrite the text, inserting highly relevant emojis throughout. Always output actual unicode emojis.",
         "human" to "Rewrite to sound naturally human, not AI-generated. Never use emdashes or semicolons, use commas or periods instead. Drop AI clichés and filler phrases. Use contractions, everyday words, and varied sentence lengths. Keep all facts, names, and numbers intact.",
         "reply" to "Generate a contextual reply to this message."
     )

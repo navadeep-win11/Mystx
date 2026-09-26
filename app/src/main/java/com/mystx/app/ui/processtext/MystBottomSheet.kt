@@ -132,7 +132,7 @@ private fun SheetSurface(
             // Follows the finger while the sheet is being dragged.
             .offset { IntOffset(0, dragOffset.value.roundToInt()) }
             .clip(RoundedCornerShape(topStart = CORNER_DP.dp, topEnd = CORNER_DP.dp))
-            .background(MaterialTheme.colorScheme.surface)
+            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.95f))
             // Swallow taps that land on the sheet itself. A background alone does not consume
             // pointer input, so without this a tap on the handle or on the title row — anywhere
             // without an interactive child under it — fell through to the scrim behind and
