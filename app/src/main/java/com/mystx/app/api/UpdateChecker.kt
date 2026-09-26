@@ -13,7 +13,7 @@ object UpdateChecker {
 
     suspend fun checkForUpdates(currentVersionName: String): UpdateInfo? = withContext(Dispatchers.IO) {
         try {
-            val url = URL("https://api.github.com/repos/mystx-navadeep/Mystx/releases/latest")
+            val url = URL("https://api.github.com/repos/mystxnavadeep/Mystx/releases/latest")
             val connection = url.openConnection() as HttpURLConnection
             connection.requestMethod = "GET"
             connection.setRequestProperty("User-Agent", "Mystx-App")

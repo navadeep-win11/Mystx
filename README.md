@@ -18,12 +18,12 @@ Type a trigger like **`?fix`** at the end of any text, in any app, and watch it 
 [![Kotlin](https://img.shields.io/badge/Kotlin-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white)](#%EF%B8%8F-tech-stack)
 [![License: MIT](https://img.shields.io/badge/MIT-blue?style=for-the-badge&logo=opensourceinitiative&logoColor=white)](LICENSE)
 
-[![Latest Release](https://img.shields.io/github/v/release/mystx-navadeep/Mystx?style=flat-square&label=Latest&color=brightgreen)](https://github.com/mystx-navadeep/Mystx/releases/latest)
-[![Build](https://img.shields.io/github/actions/workflow/status/mystx-navadeep/Mystx/build.yml?branch=master&style=flat-square&label=CI)](https://github.com/mystx-navadeep/Mystx/actions/workflows/build.yml)
+[![Latest Release](https://img.shields.io/github/v/release/mystxnavadeep/Mystx?style=flat-square&label=Latest&color=brightgreen)](https://github.com/mystxnavadeep/Mystx/releases/latest)
+[![Build](https://img.shields.io/github/actions/workflow/status/mystxnavadeep/Mystx/build.yml?branch=master&style=flat-square&label=CI)](https://github.com/mystxnavadeep/Mystx/actions/workflows/build.yml)
 
 <br>
 
-[<img src="https://img.shields.io/badge/⬇_Download_APK-282828?style=for-the-badge" alt="Download APK" height="36">](https://github.com/mystx-navadeep/Mystx/releases/latest)
+[<img src="https://img.shields.io/badge/⬇_Download_APK-282828?style=for-the-badge" alt="Download APK" height="36">](https://github.com/mystxnavadeep/Mystx/releases/latest)
 
 <br>
 
@@ -45,7 +45,7 @@ Type a trigger like **`?fix`** at the end of any text, in any app, and watch it 
 
 ## 🚀 Getting Started
 
-1. **Download** the APK from [Releases](https://github.com/mystx-navadeep/Mystx/releases/latest) and install it.
+1. **Download** the APK from [Releases](https://github.com/mystxnavadeep/Mystx/releases/latest) and install it.
 2. **Enable the accessibility service**: Settings → Accessibility → Mystx → On.
 3. **Add an API key** in the **Keys** tab:
    - Gemini: [aistudio.google.com/api-keys](https://aistudio.google.com/api-keys)
@@ -68,14 +68,14 @@ Add your own in the **Commands** tab.
 ## 🛠️ Building from Source
 
 ```bash
-git clone https://github.com/mystx-navadeep/Mystx.git
+git clone https://github.com/mystxnavadeep/Mystx.git
 cd Mystx
 ./gradlew assembleDebug        # debug APK
 ./gradlew assembleRelease      # needs signing secrets (CI does this)
 ```
 
 Or open the project in **Android Studio**. Every push to `master` runs the CI pipeline,
-which builds a signed APK and publishes it to [Releases](https://github.com/mystx-navadeep/Mystx/releases).
+which builds a signed APK and publishes it to [Releases](https://github.com/mystxnavadeep/Mystx/releases).
 
 
 ## 📄 License

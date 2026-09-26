@@ -3,7 +3,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
-val baseVersion = "1.0"
+val baseVersion = "2.0"
 
 android {
     namespace = "com.mystx.app"
