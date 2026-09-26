@@ -46,7 +46,7 @@ class QuickExplainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
-        val selectedText = intent.getCharSequenceExtra(Intent.EXTRA_PROCESS_TEXT)?.toString() ?: ""
+        val selectedText = intent.getCharSequenceExtra(Intent.EXTRA_PROCESS_TEXT)?.toString() ?: intent.getCharSequenceExtra(Intent.EXTRA_TEXT)?.toString() ?: ""
         if (selectedText.isBlank()) {
             finish()
             return

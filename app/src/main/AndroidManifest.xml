@@ -20,22 +20,22 @@
                 <action android:name="android.intent.action.PROCESS_TEXT" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="text/*" />
-            </intent-filter>
+            <data android:mimeType="text/plain" /></intent-filter>
             
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="https" />
             </intent-filter>
-        </activity>
+        <intent-filter android:label="@string/mystx_commands"><action android:name="android.intent.action.SEND" /><category android:name="android.intent.category.DEFAULT" /><data android:mimeType="text/plain" /></intent-filter></activity>
 
         <activity android:name=".ui.processtext.QuickExplainActivity" android:exported="true" android:label="@string/mystx_explain" android:excludeFromRecents="true" android:theme="@style/Theme.Mystx.Dialog">
             <intent-filter android:label="@string/mystx_explain" android:priority="999">
                 <action android:name="android.intent.action.PROCESS_TEXT" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="text/*" />
-            </intent-filter>
-        </activity>
+            <data android:mimeType="text/plain" /></intent-filter>
+        <intent-filter android:label="@string/mystx_explain"><action android:name="android.intent.action.SEND" /><category android:name="android.intent.category.DEFAULT" /><data android:mimeType="text/plain" /></intent-filter></activity>
 
         <service android:name=".service.AssistantService" android:exported="true" android:label="@string/accessibility_service_label" android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <intent-filter>

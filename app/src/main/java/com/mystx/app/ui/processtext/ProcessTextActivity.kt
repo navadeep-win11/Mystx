@@ -76,7 +76,7 @@ class ProcessTextActivity : ComponentActivity() {
         // PROCESS_TEXT activities are always launched fresh with their Intent, so the selection
         // itself never needs saving across process death.
         val parsed = ProcessTextInput.parseSelection(
-            rawText = intent?.getCharSequenceExtra(Intent.EXTRA_PROCESS_TEXT),
+            rawText = intent?.getCharSequenceExtra(Intent.EXTRA_PROCESS_TEXT) ?: intent?.getCharSequenceExtra(Intent.EXTRA_TEXT),
             readOnlyExtra = intent?.extras
                 ?.takeIf { it.containsKey(Intent.EXTRA_PROCESS_TEXT_READONLY) }
                 ?.getBoolean(Intent.EXTRA_PROCESS_TEXT_READONLY)
