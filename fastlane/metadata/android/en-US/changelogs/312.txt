@@ -1,0 +1,2 @@
+- fix: Return true on empty import to satisfy unit tests
+- fix: Merge existing commands during import instead of overwriting
