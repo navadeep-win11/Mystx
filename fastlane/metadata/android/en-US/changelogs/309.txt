@@ -1,0 +1,2 @@
+- fix: Resolve missing HistoryManager import in ProcessTextViewModel
+- feat: Add full history saving and instant AI caching for ProcessText selection menus
