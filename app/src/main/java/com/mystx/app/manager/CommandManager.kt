@@ -272,20 +272,36 @@ class CommandManager(context: Context) {
      * to [MAX_PROMPT_LENGTH], unknown types default to [CommandType.AI], and unusable entries
      * (blank trigger/prompt) are dropped. The result is capped at [MAX_CUSTOM_COMMANDS].
      */
-    @Synchronized fun importCommands(json: String): Boolean {
+        @Synchronized fun importCommands(json: String): Boolean {
         return try {
             val arr = JSONArray(json)
+            if (arr.length() == 0) return false
+            
             val prefix = getTriggerPrefix()
-            val cleaned = JSONArray()
+            val existingStr = prefs.getString("custom_commands", "[]") ?: "[]"
+            val existingArr = try { JSONArray(existingStr) } catch (_: Exception) { JSONArray() }
+            
+            // Map to prevent duplicates. Key is the trigger.
+            val mergedMap = LinkedHashMap<String, JSONObject>()
+            
+            // Load existing
+            for (i in 0 until existingArr.length()) {
+                val obj = existingArr.optJSONObject(i) ?: continue
+                val t = obj.optString("trigger", "")
+                if (t.isNotEmpty()) {
+                    mergedMap[t] = obj
+                }
+            }
+            
+            // Merge new
+            var importedCount = 0
             for (i in 0 until arr.length()) {
-                if (cleaned.length() >= MAX_CUSTOM_COMMANDS) break
+                if (mergedMap.size >= MAX_CUSTOM_COMMANDS) break
                 val obj = arr.optJSONObject(i) ?: continue
                 var trigger = obj.optString("trigger", "").trim()
                 val prompt = obj.optString("prompt", "").take(MAX_PROMPT_LENGTH)
                 if (trigger.isEmpty() || prompt.isBlank()) continue
                 if (!trigger.startsWith(prefix)) {
-                    // Same migration as setTriggerPrefix: strip any leading non-alphanumeric
-                    // char, then apply the current prefix.
                     val stripped = if (!trigger[0].isLetterOrDigit()) trigger.substring(1) else trigger
                     trigger = prefix + stripped
                 }
@@ -297,9 +313,16 @@ class CommandManager(context: Context) {
                 out.put("prompt", prompt)
                 out.put("type",
                     if (type == CommandType.TEXT_REPLACER.name) CommandType.TEXT_REPLACER.name else CommandType.AI.name)
-                cleaned.put(out)
+                
+                mergedMap[trigger] = out
+                importedCount++
             }
-            if (arr.length() > 0 && cleaned.length() == 0) return false
+            
+            if (importedCount == 0) return false
+            
+            val cleaned = JSONArray()
+            mergedMap.values.forEach { cleaned.put(it) }
+            
             prefs.edit().putString("custom_commands", cleaned.toString()).apply()
             invalidateCache()
             true
