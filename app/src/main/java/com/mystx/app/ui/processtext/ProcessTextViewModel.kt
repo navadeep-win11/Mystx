@@ -12,6 +12,7 @@ import com.mystx.app.manager.CommandManager
 import com.mystx.app.manager.CommandStudioStore
 import com.mystx.app.manager.KeyManager
 import com.mystx.app.manager.StatsManager
+import com.mystx.app.model.HistoryManager
 import com.mystx.app.model.Command
 import com.mystx.app.model.CommandType
 import com.mystx.app.model.PromptPlaceholders
