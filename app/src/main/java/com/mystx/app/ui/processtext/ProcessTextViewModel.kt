@@ -131,6 +131,14 @@ class ProcessTextViewModel(
                 )
                 val finalPrompt = PromptPlaceholders.render(richCommand.promptTemplate, context)
 
+                val cached = HistoryManager.findCachedResponse(getApplication(), selection.text, richCommand.trigger)
+                if (cached != null) {
+                    _uiState.value = UiState.Preview(cached, canInsert = !selection.readOnly)
+                    inFlight.set(false)
+                    return@launch
+                }
+
+
                 // On IO: KeyManager is Keystore-backed and prefs are disk-backed, both read on
                 // whatever dispatcher calls them (the HTTP clients switch to IO themselves).
                 val outcome = withTimeout(REQUEST_TIMEOUT_MS) {
@@ -147,6 +155,8 @@ class ProcessTextViewModel(
                     is CommandOutcome.Success -> {
                         try { withContext(Dispatchers.IO) { statsManager.recordUsage(richCommand.trigger) } }
                         catch (e: Exception) { Log.w(TAG, "recording usage failed", e) }
+                        try { withContext(Dispatchers.IO) { HistoryManager.addEntry(getApplication(), selection.text, richCommand.trigger, outcome.text, true) } }
+                        catch (e: Exception) { Log.w(TAG, "saving history failed", e) }
                         UiState.Preview(outcome.text, canInsert = !selection.readOnly)
                     }
                     is CommandOutcome.Refusal ->

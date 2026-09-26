@@ -103,6 +103,15 @@ fun QuickExplainScreen(selectedText: String, onClose: () -> Unit, onDrag: (Float
                 Please respond natively in ${lang}.
             """.trimIndent()
 
+            val cached = HistoryManager.findCachedResponse(context, selectedText, "QuickExplain")
+            if (cached != null) {
+                withContext(Dispatchers.Main) {
+                    isLoading = false
+                    result = cached
+                }
+                return@withContext
+            }
+
             val outcome = runTextCommand(
                 context, keyManager, geminiClient, openAIClient,
                 prompt, selectedText

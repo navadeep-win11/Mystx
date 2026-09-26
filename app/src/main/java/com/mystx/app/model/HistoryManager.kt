@@ -94,6 +94,6 @@ object HistoryManager {
     fun findCachedResponse(context: Context, originalText: String, commandTrigger: String): String? {
         loadHistory(context)
         // Only fetch cache for non-selection (keyboard typed) items
-        return cachedHistory.find { !it.isSelection && it.originalText == originalText && it.commandTrigger == commandTrigger }?.response
+        return cachedHistory.find { it.originalText == originalText && it.commandTrigger == commandTrigger }?.response
     }
 }
