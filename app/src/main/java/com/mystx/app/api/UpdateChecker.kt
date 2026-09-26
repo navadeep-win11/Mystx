@@ -2,37 +2,39 @@ package com.mystx.app.api
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import okhttp3.OkHttpClient
-import okhttp3.Request
 import org.json.JSONObject
+import java.io.BufferedReader
+import java.io.InputStreamReader
+import java.net.HttpURLConnection
+import java.net.URL
 
 object UpdateChecker {
-    private val client = OkHttpClient()
-
     data class UpdateInfo(val version: String, val url: String, val body: String)
 
     suspend fun checkForUpdates(currentVersionName: String): UpdateInfo? = withContext(Dispatchers.IO) {
         try {
-            val request = Request.Builder()
-                .url("https://api.github.com/repos/navadeep-win11/Mystx/releases/latest")
-                .header("User-Agent", "Mystx-App")
-                .build()
+            val url = URL("https://api.github.com/repos/navadeep-win11/Mystx/releases/latest")
+            val connection = url.openConnection() as HttpURLConnection
+            connection.requestMethod = "GET"
+            connection.setRequestProperty("User-Agent", "Mystx-App")
+            connection.connectTimeout = 5000
+            connection.readTimeout = 5000
 
-            client.newCall(request).execute().use { response ->
-                if (response.isSuccessful) {
-                    val body = response.body?.string() ?: return@use null
-                    val json = JSONObject(body)
-                    val tagName = json.getString("tag_name")
-                    val htmlUrl = json.getString("html_url") // wait, it's html_url
-                    val releaseNotes = json.optString("body", "")
+            if (connection.responseCode == 200) {
+                val reader = BufferedReader(InputStreamReader(connection.inputStream))
+                val responseBody = reader.readText()
+                reader.close()
 
-                    // simple version string comparison, e.g. "v1.0.100" vs "1.0.100"
-                    val latestClean = tagName.replace("v", "")
-                    val currentClean = currentVersionName.replace("v", "")
+                val json = JSONObject(responseBody)
+                val tagName = json.getString("tag_name")
+                val htmlUrl = json.getString("html_url")
+                val releaseNotes = json.optString("body", "")
 
-                    if (isNewerVersion(latestClean, currentClean)) {
-                        return@withContext UpdateInfo(tagName, json.getString("html_url"), releaseNotes)
-                    }
+                val latestClean = tagName.replace("v", "")
+                val currentClean = currentVersionName.replace("v", "")
+
+                if (isNewerVersion(latestClean, currentClean)) {
+                    return@withContext UpdateInfo(tagName, htmlUrl, releaseNotes)
                 }
             }
         } catch (e: Exception) {
