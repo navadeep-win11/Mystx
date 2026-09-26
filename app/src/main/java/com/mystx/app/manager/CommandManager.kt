@@ -275,7 +275,7 @@ class CommandManager(context: Context) {
         @Synchronized fun importCommands(json: String): Boolean {
         return try {
             val arr = JSONArray(json)
-            if (arr.length() == 0) return false
+            if (arr.length() == 0) return true
             
             val prefix = getTriggerPrefix()
             val existingStr = prefs.getString("custom_commands", "[]") ?: "[]"
@@ -318,7 +318,7 @@ class CommandManager(context: Context) {
                 importedCount++
             }
             
-            if (importedCount == 0) return false
+            if (arr.length() > 0 && importedCount == 0) return false
             
             val cleaned = JSONArray()
             mergedMap.values.forEach { cleaned.put(it) }
