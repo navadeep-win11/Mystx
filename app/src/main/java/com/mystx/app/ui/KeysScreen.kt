@@ -48,6 +48,17 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+
+@Composable
+fun getProviderHint(key: String): String {
+    return when {
+        key.startsWith("AIza") -> "Gemini"
+        key.startsWith("gsk_") -> "Groq"
+        key.startsWith("sk-") -> "OpenAI / Custom"
+        else -> "Custom API"
+    }
+}
+
 @Composable
 fun KeysScreen(keyManager: KeyManager, prefs: SharedPreferences) {
     val context = LocalContext.current
@@ -217,13 +228,19 @@ fun KeysScreen(keyManager: KeyManager, prefs: SharedPreferences) {
                 ) {
                     itemsIndexed(keys, key = { index, k -> "$index-${k.hashCode()}" }) { index, key ->
                         MystItemCard {
-                            Text(
-                                text = "••••••••" + key.takeLast(4),
-                                fontWeight = FontWeight.Medium,
-                                fontSize = 15.sp,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier.weight(1f).semantics(mergeDescendants = true) {}
-                            )
+                            Column(modifier = Modifier.weight(1f).semantics(mergeDescendants = true) {}) {
+                                Text(
+                                    text = "••••••••" + key.takeLast(4),
+                                    fontWeight = FontWeight.Medium,
+                                    fontSize = 15.sp,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    text = getProviderHint(key),
+                                    fontSize = 11.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
                             Text(
                                 text = stringResource(R.string.delete_confirm_button),
                                 fontSize = 13.sp,

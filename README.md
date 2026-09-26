@@ -77,11 +77,6 @@ cd Mystx
 Or open the project in **Android Studio**. Every push to `master` runs the CI pipeline,
 which builds a signed APK and publishes it to [Releases](https://github.com/navadeep-win11/Mystx/releases).
 
-## 🙌 Credits
-
-Mystx is built on top of [SwiftSlate](https://github.com/Musheer360/SwiftSlate) by
-[Musheer360](https://github.com/Musheer360) (MIT License) — rebranded and extended with
-the B.ai provider and a new look.
 
 ## 📄 License
 

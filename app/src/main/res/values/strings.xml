@@ -77,7 +77,7 @@
     <string name="backup_export_error">Export failed</string>
     <string name="backup_import_success">Commands imported successfully</string>
     <string name="backup_import_error">Invalid backup file</string>
-    <string name="backup_import_confirm">This will replace all your existing custom commands. Continue?</string>
+    <string name="backup_import_confirm">This will merge the imported commands with your existing ones. Continue?</string>
     <string name="backup_import_cancel">Cancel</string>
     <string name="settings_check_updates">Check for updates</string>
     <string name="settings_made_by">Crafted by Navadeep · Instagram @mystx.navadeep</string>

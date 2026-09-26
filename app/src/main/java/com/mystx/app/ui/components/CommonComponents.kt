@@ -459,7 +459,7 @@ fun MystDialog(
     AlertDialog(
         onDismissRequest = onDismissRequest,
         shape = MystCardShape,
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = if (isSystemInDarkTheme()) Color(0xFF2C2C2E) else Color(0xFFE5E5EA),
         title = {
             Text(title, fontWeight = FontWeight.Bold, fontSize = 17.sp)
         },

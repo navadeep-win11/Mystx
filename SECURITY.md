@@ -2,11 +2,11 @@
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability in SwiftSlate, please report it privately:
+If you discover a security vulnerability in Mystx, please report it privately:
 
 **Email:** me@musheer360.com
 
-**Subject line:** `[SwiftSlate Security] Brief description`
+**Subject line:** `[Mystx Security] Brief description`
 
 Please include:
 - Description of the vulnerability

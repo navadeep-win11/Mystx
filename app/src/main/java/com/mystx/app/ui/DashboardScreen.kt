@@ -28,6 +28,13 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.mystx.app.R
+
+import androidx.compose.ui.platform.LocalUriHandler
+import com.mystx.app.BuildConfig
+import com.mystx.app.api.UpdateChecker
+import kotlinx.coroutines.launch
+import com.mystx.app.ui.components.MystDialog
+
 import com.mystx.app.MystxApp
 import com.mystx.app.manager.CommandManager
 import com.mystx.app.manager.KeyManager
@@ -115,6 +122,18 @@ fun DashboardScreen(keyManager: KeyManager, commandManager: CommandManager, stat
     var monthlyRequests by remember { mutableIntStateOf(statsManager.monthlyRequests) }
     var favoriteCommand by remember { mutableStateOf(statsManager.favoriteCommand) }
     var dailyCounts by remember { mutableStateOf(statsManager.dailyCounts()) }
+
+    
+    var updateInfo by remember { mutableStateOf<UpdateChecker.UpdateInfo?>(null) }
+    val scope = rememberCoroutineScope()
+    val uriHandler = LocalUriHandler.current
+
+    LaunchedEffect(Unit) {
+        val info = UpdateChecker.checkForUpdates(BuildConfig.VERSION_NAME)
+        if (info != null) {
+            updateInfo = info
+        }
+    }
 
     val lifecycleOwner = LocalLifecycleOwner.current
 
@@ -231,6 +250,21 @@ fun DashboardScreen(keyManager: KeyManager, commandManager: CommandManager, stat
         Spacer(modifier = Modifier.height(10.dp))
 
         // Interrupted-service banner: the toggle can still read "on" while the process is dead.
+        
+    updateInfo?.let { info ->
+        MystDialog(
+            title = "Update Available",
+            message = "A new version of Mystx (${info.version}) is available. Would you like to download it now?",
+            confirmLabel = "Update",
+            dismissLabel = "Later",
+            onConfirm = {
+                uriHandler.openUri(info.url)
+                updateInfo = null
+            },
+            onDismissRequest = { updateInfo = null }
+        )
+    }
+
         if (showKilledBanner) {
             MystCard {
                 Text(
