@@ -155,7 +155,7 @@ fun PdfReaderScreen(
             ) {
                 Icon(Icons.Default.Search, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
-                Text("✨ Explain Selected")
+                Text("✨ Explain")
             }
         }
 
