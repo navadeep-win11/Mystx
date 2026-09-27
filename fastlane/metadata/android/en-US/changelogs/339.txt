@@ -1,0 +1,1 @@
+- fix: move PDF copying to Dispatchers.IO to prevent NetworkOnMainThreadException or StrictMode crashes
