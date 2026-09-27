@@ -12,7 +12,6 @@ import android.webkit.JavascriptInterface
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 
-import androidx.webkit.WebViewAssetLoader
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 
@@ -101,14 +100,12 @@ fun PdfReaderScreen(
                         settings.builtInZoomControls = true
                         settings.displayZoomControls = false
 
-                        addJavascriptInterface(object : Any() {
+                        class JsBridge {
+                            @androidx.annotation.Keep
                             @JavascriptInterface
                             fun onSelectionChanged(text: String) {
-                                // Called from JS when selection changes
                                 val trimmed = text.trim()
                                 if (trimmed.isNotEmpty() && trimmed != "null") {
-                                    // We don't automatically open the popup, we just store the text
-                                    // and show a beautiful button.
                                     selectedText = trimmed
                                 } else {
                                     if (!isPopupVisible) {
@@ -116,7 +113,8 @@ fun PdfReaderScreen(
                                     }
                                 }
                             }
-                        }, "AndroidBridge")
+                        }
+                        addJavascriptInterface(JsBridge(), "AndroidBridge")
 
                         webChromeClient = object : WebChromeClient() {
                             override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
@@ -124,14 +122,32 @@ fun PdfReaderScreen(
                             }
                         }
 
-                        val assetLoader = WebViewAssetLoader.Builder()
-                            .addPathHandler("/assets/", WebViewAssetLoader.AssetsPathHandler(context))
-                            .addPathHandler("/cache/", WebViewAssetLoader.InternalStoragePathHandler(context, context.cacheDir))
-                            .build()
-
+                        
                         webViewClient = object : WebViewClient() {
                             override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? {
-                                return assetLoader.shouldInterceptRequest(request.url)
+                                val url = request.url.toString()
+                                try {
+                                    if (url.startsWith("https://localhost/assets/")) {
+                                        val assetPath = url.substring("https://localhost/assets/".length)
+                                        val mimeType = when {
+                                            assetPath.endsWith(".html") -> "text/html"
+                                            assetPath.endsWith(".js") -> "application/javascript"
+                                            assetPath.endsWith(".css") -> "text/css"
+                                            assetPath.endsWith(".png") -> "image/png"
+                                            assetPath.endsWith(".properties") -> "text/plain"
+                                            else -> "application/octet-stream"
+                                        }
+                                        val inputStream = context.assets.open(assetPath)
+                                        return WebResourceResponse(mimeType, "UTF-8", inputStream)
+                                    } else if (url.startsWith("https://localhost/pdf/")) {
+                                        val file = java.io.File(localPdfPath!!)
+                                        val inputStream = java.io.FileInputStream(file)
+                                        return WebResourceResponse("application/pdf", "UTF-8", inputStream)
+                                    }
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                }
+                                return super.shouldInterceptRequest(view, request)
                             }
 
                             override fun onPageFinished(view: WebView?, url: String?) {
@@ -145,9 +161,7 @@ fun PdfReaderScreen(
                             }
                         }
 
-                        // Use the local AppAssets domain! 
-                        val fileParam = "/cache/temp_viewer.pdf"
-                        val viewerUrl = "https://appassets.androidplatform.net/assets/pdfjs/web/viewer.html?file=${android.net.Uri.encode(fileParam)}"
+                        val viewerUrl = "https://localhost/assets/pdfjs/web/viewer.html?file=https://localhost/pdf/temp.pdf"
                         loadUrl(viewerUrl)
                     }
                 }
