@@ -11,6 +11,11 @@ import android.webkit.ConsoleMessage
 import android.webkit.JavascriptInterface
 import android.webkit.WebChromeClient
 import android.webkit.WebView
+
+import androidx.webkit.WebViewAssetLoader
+import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
+
 import android.webkit.WebViewClient
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.*
@@ -117,7 +122,16 @@ fun PdfReaderScreen(
                             }
                         }
 
+                        val assetLoader = WebViewAssetLoader.Builder()
+                            .addPathHandler("/assets/", WebViewAssetLoader.AssetsPathHandler(context))
+                            .addPathHandler("/cache/", WebViewAssetLoader.InternalStoragePathHandler(context, context.cacheDir))
+                            .build()
+
                         webViewClient = object : WebViewClient() {
+                            override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? {
+                                return assetLoader.shouldInterceptRequest(request.url)
+                            }
+
                             override fun onPageFinished(view: WebView?, url: String?) {
                                 super.onPageFinished(view, url)
                                 view?.evaluateJavascript("""
@@ -129,7 +143,9 @@ fun PdfReaderScreen(
                             }
                         }
 
-                        val viewerUrl = "file:///android_asset/pdfjs/web/viewer.html?file=file://$localPdfPath"
+                        // Use the local AppAssets domain! 
+                        val fileParam = "/cache/temp_viewer.pdf"
+                        val viewerUrl = "https://appassets.androidplatform.net/assets/pdfjs/web/viewer.html?file=${android.net.Uri.encode(fileParam)}"
                         loadUrl(viewerUrl)
                     }
                 }
