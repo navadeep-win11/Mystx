@@ -69,16 +69,18 @@ fun PdfReaderScreen(
     var isPopupVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(pdfUri) {
-        try {
-            val inputStream = context.contentResolver.openInputStream(pdfUri)
-            val tempFile = File(context.cacheDir, "temp_viewer.pdf")
-            val outputStream = FileOutputStream(tempFile)
-            inputStream?.copyTo(outputStream)
-            inputStream?.close()
-            outputStream.close()
-            localPdfPath = tempFile.absolutePath
-        } catch (e: Exception) {
-            e.printStackTrace()
+        withContext(Dispatchers.IO) {
+            try {
+                val inputStream = context.contentResolver.openInputStream(pdfUri)
+                val tempFile = File(context.cacheDir, "temp_viewer.pdf")
+                val outputStream = FileOutputStream(tempFile)
+                inputStream?.copyTo(outputStream)
+                inputStream?.close()
+                outputStream.close()
+                localPdfPath = tempFile.absolutePath
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 
