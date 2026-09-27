@@ -2,6 +2,8 @@ package com.mystx.app
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -67,27 +69,35 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        
+        val initialPdfUri = if (intent.action == Intent.ACTION_VIEW && intent.type == "application/pdf") {
+            intent.data
+        } else null
+        
         setContent {
             MystxTheme {
-                MystxMainScreen()
+                MystxMainScreen(initialPdfUri = initialPdfUri)
             }
         }
     }
 }
 
 @Composable
-fun MystxMainScreen(vm: MystxViewModel = viewModel()) {
+fun MystxMainScreen(vm: MystxViewModel = viewModel(), initialPdfUri: Uri? = null) {
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
     var selectedTab by rememberSaveable { mutableStateOf(Tab.Dashboard) }
 
     var studioSubScreen by rememberSaveable { mutableStateOf<String?>(null) }
     var editingCommand by remember { mutableStateOf<RichCommand?>(null) }
+    var pdfUri by remember { mutableStateOf<Uri?>(initialPdfUri) }
 
     val isEditing = editingCommand != null || studioSubScreen?.startsWith("editor") == true
 
-    BackHandler(enabled = studioSubScreen != null || (selectedTab == Tab.Commands && isEditing)) {
-        if (isEditing) {
+    BackHandler(enabled = pdfUri != null || studioSubScreen != null || (selectedTab == Tab.Commands && isEditing)) {
+        if (pdfUri != null) {
+            pdfUri = null
+        } else if (isEditing) {
             editingCommand = null
             if (selectedTab == Tab.Settings) {
                 studioSubScreen = "studio_from_settings"
@@ -118,8 +128,6 @@ fun MystxMainScreen(vm: MystxViewModel = viewModel()) {
                     permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                 }
             } catch (_: Exception) {
-                // A corrupted pref must not crash this activity — it shares the process with
-                // the accessibility service (#125).
             }
         }
     }
@@ -135,7 +143,11 @@ fun MystxMainScreen(vm: MystxViewModel = viewModel()) {
                     .padding(innerPadding)
                     .statusBarsPadding()
             ) {
-                when {
+                if (pdfUri != null) {
+                    com.mystx.app.ui.PdfReaderScreen(pdfUri = pdfUri!!) {
+                        pdfUri = null
+                    }
+                } else when {
                     isEditing -> {
                         CommandEditorScreen(
                             initialCommand = editingCommand,

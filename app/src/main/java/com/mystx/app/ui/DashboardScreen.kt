@@ -1,5 +1,7 @@
 package com.mystx.app.ui
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import android.accessibilityservice.AccessibilityServiceInfo
 import android.annotation.SuppressLint
 import android.content.Context
@@ -128,6 +130,20 @@ fun DashboardScreen(keyManager: KeyManager, commandManager: CommandManager, stat
     val scope = rememberCoroutineScope()
     val uriHandler = LocalUriHandler.current
 
+    val pdfPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument(),
+        onResult = { uri ->
+            if (uri != null) {
+                val intent = Intent(Intent.ACTION_VIEW).apply {
+                    setDataAndType(uri, "application/pdf")
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+                context.startActivity(intent)
+            }
+        }
+    )
+
+
     LaunchedEffect(Unit) {
         val info = UpdateChecker.checkForUpdates(BuildConfig.VERSION_NAME)
         if (info != null) {
@@ -244,6 +260,37 @@ fun DashboardScreen(keyManager: KeyManager, commandManager: CommandManager, stat
                         modifier = Modifier.padding(top = 8.dp)
                     )
                 }
+            }
+        }
+
+        
+        // Open PDF Button
+        MystCard {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        text = "Read PDF",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = "Ask AI while reading",
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                MystTonalButton(
+                    text = "Open",
+                    onClick = {
+                        pdfPickerLauncher.launch(arrayOf("application/pdf"))
+                    }
+                )
             }
         }
 
