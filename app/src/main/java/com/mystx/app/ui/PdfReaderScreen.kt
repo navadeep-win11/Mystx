@@ -96,7 +96,7 @@ fun PdfReaderScreen(
                             }
                         }
 
-                        customActionModeCallback = object : ActionMode.Callback {
+                        customSelectionActionModeCallback = object : ActionMode.Callback {
                             override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
                                 menu.add(0, 1001, 0, "Mystx Explain")
                                 return true
