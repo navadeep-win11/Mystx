@@ -1,0 +1,1 @@
+- feat: implement aesthetic JS bridge for text selection in PdfReaderScreen
