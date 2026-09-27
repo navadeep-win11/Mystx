@@ -122,10 +122,11 @@ fun PdfReaderScreen(
                 modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 32.dp),
                 containerColor = MaterialTheme.colorScheme.primary
             ) {
-                Icon(Icons.Default.Close, contentDescription = null) // We will keep close or use Search icon
+                Icon(Icons.Default.Search, contentDescription = null) // We will keep close or use Search icon
                 Spacer(Modifier.width(8.dp))
                 Text("Explain Selected Text")
             }
+        }
 
         IconButton(
             onClick = onClose,
