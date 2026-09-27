@@ -8,10 +8,12 @@ import android.view.ActionMode
 import android.view.Menu
 import android.view.MenuItem
 import android.webkit.ConsoleMessage
+import android.webkit.JavascriptInterface
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -59,7 +61,7 @@ fun PdfReaderScreen(
     val context = LocalContext.current
     var localPdfPath by remember { mutableStateOf<String?>(null) }
     var selectedText by remember { mutableStateOf<String?>(null) }
-    var webViewRef by remember { mutableStateOf<WebView?>(null) }
+    var isPopupVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(pdfUri) {
         try {
@@ -85,7 +87,6 @@ fun PdfReaderScreen(
                 modifier = Modifier.fillMaxSize(),
                 factory = { ctx ->
                     WebView(ctx).apply {
-                        webViewRef = this
                         settings.javaScriptEnabled = true
                         settings.allowFileAccess = true
                         settings.allowFileAccessFromFileURLs = true
@@ -93,13 +94,41 @@ fun PdfReaderScreen(
                         settings.builtInZoomControls = true
                         settings.displayZoomControls = false
 
+                        addJavascriptInterface(object : Any() {
+                            @JavascriptInterface
+                            fun onSelectionChanged(text: String) {
+                                // Called from JS when selection changes
+                                val trimmed = text.trim()
+                                if (trimmed.isNotEmpty() && trimmed != "null") {
+                                    // We don't automatically open the popup, we just store the text
+                                    // and show a beautiful button.
+                                    selectedText = trimmed
+                                } else {
+                                    if (!isPopupVisible) {
+                                        selectedText = null
+                                    }
+                                }
+                            }
+                        }, "AndroidBridge")
+
                         webChromeClient = object : WebChromeClient() {
                             override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
                                 return super.onConsoleMessage(consoleMessage)
                             }
                         }
 
-                        webViewClient = WebViewClient()
+                        webViewClient = object : WebViewClient() {
+                            override fun onPageFinished(view: WebView?, url: String?) {
+                                super.onPageFinished(view, url)
+                                view?.evaluateJavascript("""
+                                    document.addEventListener("selectionchange", function() {
+                                        var text = window.getSelection().toString();
+                                        window.AndroidBridge.onSelectionChanged(text);
+                                    });
+                                """.trimIndent(), null)
+                            }
+                        }
+
                         val viewerUrl = "file:///android_asset/pdfjs/web/viewer.html?file=file://$localPdfPath"
                         loadUrl(viewerUrl)
                     }
@@ -109,23 +138,24 @@ fun PdfReaderScreen(
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         }
 
-        // Floating Action Button to get selected text
-        if (localPdfPath != null) {
+        // Aesthetic Floating Button that appears ONLY when text is selected
+        AnimatedVisibility(
+            visible = selectedText != null && !isPopupVisible,
+            enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+            exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
+            modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 32.dp)
+        ) {
             ExtendedFloatingActionButton(
                 onClick = {
-                    webViewRef?.evaluateJavascript("(function(){return window.getSelection().toString()})()") { result ->
-                        val text = result?.trim('"', '\'')
-                        if (!text.isNullOrBlank() && text != "null") {
-                            selectedText = text
-                        }
-                    }
+                    isPopupVisible = true
                 },
-                modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 32.dp),
-                containerColor = MaterialTheme.colorScheme.primary
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                shape = RoundedCornerShape(24.dp)
             ) {
-                Icon(Icons.Default.Search, contentDescription = null) // We will keep close or use Search icon
+                Icon(Icons.Default.Search, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
-                Text("Explain Selected Text")
+                Text("✨ Explain Selected")
             }
         }
 
@@ -139,10 +169,13 @@ fun PdfReaderScreen(
             Icon(Icons.Default.Close, contentDescription = "Close PDF", tint = Color.White)
         }
 
-        if (selectedText != null) {
+        if (isPopupVisible && selectedText != null) {
             DraggableExplainPopup(
                 selectedText = selectedText!!,
-                onClose = { selectedText = null }
+                onClose = { 
+                    isPopupVisible = false 
+                    selectedText = null
+                }
             )
         }
     }
@@ -215,14 +248,13 @@ fun DraggableExplainPopup(
             .offset { IntOffset(offsetX.roundToInt(), offsetY.roundToInt()) }
             .size(width.dp, height.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.95f))
+            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.98f))
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            // Drag handle area (Title bar)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
                     .pointerInput(Unit) {
                         detectDragGestures { change, dragAmount ->
                             change.consume()
@@ -234,7 +266,7 @@ fun DraggableExplainPopup(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Mystx Explain (Drag Me)", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary, fontSize = 14.sp)
+                Text("✨ Mystx Explain", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary, fontSize = 14.sp)
                 Icon(Icons.Default.Close, contentDescription = "Close", modifier = Modifier.clickable { onClose() })
             }
             
@@ -246,7 +278,7 @@ fun DraggableExplainPopup(
                     maxLines = 3
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                Divider()
+                HorizontalDivider()
                 Spacer(modifier = Modifier.height(8.dp))
                 
                 if (isLoading) {
@@ -264,7 +296,6 @@ fun DraggableExplainPopup(
             }
         }
         
-        // Resize handle at bottom right corner
         Box(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
@@ -273,12 +304,11 @@ fun DraggableExplainPopup(
                 .pointerInput(Unit) {
                     detectDragGestures { change, dragAmount ->
                         change.consume()
-                        width = max(200f, width + dragAmount.x)
-                        height = max(200f, height + dragAmount.y)
+                        width = max(250f, width + dragAmount.x)
+                        height = max(250f, height + dragAmount.y)
                     }
                 }
         ) {
-            // Visual indicator for resize
             Text("◢", modifier = Modifier.align(Alignment.BottomEnd).padding(4.dp), color = Color.Gray, fontSize = 12.sp)
         }
     }
