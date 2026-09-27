@@ -1,0 +1,10 @@
+- fix: unresolved reference Search icon
+- fix: syntax error in PdfReaderScreen
+- fix: use FloatingActionButton instead of customActionModeCallback for WebView text selection
+- fix: use customSelectionActionModeCallback in WebView
+- feat: Add In-App PDF Viewer with Draggable AI Explanation
+- chore: Remove leak
+- chore: Extract
+- chore: Fix secret names
+- chore: Extract secrets via env
+- chore: Extract secrets
