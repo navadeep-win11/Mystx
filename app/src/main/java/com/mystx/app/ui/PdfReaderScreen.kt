@@ -58,6 +58,7 @@ fun PdfReaderScreen(
     val context = LocalContext.current
     var localPdfPath by remember { mutableStateOf<String?>(null) }
     var selectedText by remember { mutableStateOf<String?>(null) }
+    var webViewRef by remember { mutableStateOf<WebView?>(null) }
 
     LaunchedEffect(pdfUri) {
         try {
@@ -83,6 +84,7 @@ fun PdfReaderScreen(
                 modifier = Modifier.fillMaxSize(),
                 factory = { ctx ->
                     WebView(ctx).apply {
+                        webViewRef = this
                         settings.javaScriptEnabled = true
                         settings.allowFileAccess = true
                         settings.allowFileAccessFromFileURLs = true
@@ -96,27 +98,6 @@ fun PdfReaderScreen(
                             }
                         }
 
-                        customSelectionActionModeCallback = object : ActionMode.Callback {
-                            override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
-                                menu.add(0, 1001, 0, "Mystx Explain")
-                                return true
-                            }
-                            override fun onPrepareActionMode(mode: ActionMode, menu: Menu) = false
-                            override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
-                                if (item.itemId == 1001) {
-                                    evaluateJavascript("(function(){return window.getSelection().toString()})()") { result ->
-                                        val text = result?.trim('"', '\'')
-                                        if (!text.isNullOrBlank() && text != "null") {
-                                            selectedText = text
-                                        }
-                                    }
-                                    mode.finish()
-                                    return true
-                                }
-                                return false
-                            }
-                            override fun onDestroyActionMode(mode: ActionMode) {}
-                        }
                         webViewClient = WebViewClient()
                         val viewerUrl = "file:///android_asset/pdfjs/web/viewer.html?file=file://$localPdfPath"
                         loadUrl(viewerUrl)
@@ -126,6 +107,25 @@ fun PdfReaderScreen(
         } else {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         }
+
+        // Floating Action Button to get selected text
+        if (localPdfPath != null) {
+            ExtendedFloatingActionButton(
+                onClick = {
+                    webViewRef?.evaluateJavascript("(function(){return window.getSelection().toString()})()") { result ->
+                        val text = result?.trim('"', '\'')
+                        if (!text.isNullOrBlank() && text != "null") {
+                            selectedText = text
+                        }
+                    }
+                },
+                modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 32.dp),
+                containerColor = MaterialTheme.colorScheme.primary
+            ) {
+                Icon(Icons.Default.Close, contentDescription = null) // We will keep close or use Search icon
+                Spacer(Modifier.width(8.dp))
+                Text("Explain Selected Text")
+            }
 
         IconButton(
             onClick = onClose,
