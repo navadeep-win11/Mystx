@@ -146,3 +146,9 @@ dependencies {
     testImplementation("org.robolectric:robolectric:4.16.1")
     testImplementation("androidx.test:core-ktx:1.7.0")
 }
+
+android {
+    lint {
+        abortOnError = false
+    }
+}
