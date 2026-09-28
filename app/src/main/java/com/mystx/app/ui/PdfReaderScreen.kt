@@ -46,11 +46,6 @@ import android.view.View
 import android.widget.FrameLayout
 import androidx.fragment.app.FragmentActivity
 import androidx.pdf.viewer.fragment.PdfViewerFragment
-import android.os.Build
-import android.view.View
-import android.widget.FrameLayout
-import androidx.fragment.app.FragmentActivity
-import androidx.pdf.viewer.fragment.PdfViewerFragment
 import com.mystx.app.LocalServer
 import java.net.URLEncoder
 import com.mystx.app.api.GeminiClient
