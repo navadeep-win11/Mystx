@@ -120,23 +120,25 @@ class KeyManager internal constructor(
 
     @Synchronized
     fun addKey(key: String): Boolean {
-        if (key.isBlank() || key.length > MAX_KEY_LENGTH) return false
+        val trimmedKey = key.trim()
+        if (trimmedKey.isBlank() || trimmedKey.length > MAX_KEY_LENGTH) return false
         val keys = getKeys().toMutableList()
-        if (!keys.contains(key)) {
-            keys.add(key)
+        if (!keys.contains(trimmedKey)) {
+            keys.add(trimmedKey)
             if (!saveKeys(keys)) return false
         }
-        invalidKeys.remove(key)
+        invalidKeys.remove(trimmedKey)
         return true
     }
 
     @Synchronized
     fun removeKey(key: String): Boolean {
+        val trimmedKey = key.trim()
         val keys = getKeys().toMutableList()
-        keys.remove(key)
+        keys.remove(trimmedKey)
         val saved = saveKeys(keys)
-        rateLimitedKeys.remove(key)
-        invalidKeys.remove(key)
+        rateLimitedKeys.remove(trimmedKey)
+        invalidKeys.remove(trimmedKey)
         return saved
     }
 
@@ -186,8 +188,9 @@ class KeyManager internal constructor(
      */
     @Synchronized
     fun clearMarks(key: String) {
-        invalidKeys.remove(key)
-        rateLimitedKeys.remove(key)
+        val trimmedKey = key.trim()
+        invalidKeys.remove(trimmedKey)
+        rateLimitedKeys.remove(trimmedKey)
     }
 
     /**
@@ -198,7 +201,7 @@ class KeyManager internal constructor(
     private fun isInvalid(key: String): Boolean {
         val until = invalidKeys[key] ?: return false
         if (System.currentTimeMillis() >= until) {
-            invalidKeys.remove(key)
+            invalidKeys.remove(trimmedKey)
             return false
         }
         return true
