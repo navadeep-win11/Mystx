@@ -1,0 +1,2 @@
+- fix: remove accidentally committed garbage files and tests
+- feat: drop local server completely, set minSdk 31, and use only google native pdf viewer
