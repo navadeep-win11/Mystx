@@ -64,8 +64,7 @@ import java.io.FileOutputStream
 import kotlin.math.max
 import kotlin.math.roundToInt
 
-@SuppressLint("SetJavaScriptEnabled")
-@SuppressLint("NewApi")
+@SuppressLint("SetJavaScriptEnabled", "NewApi")
 @Composable
 fun PdfReaderScreen(
     pdfUri: Uri,
