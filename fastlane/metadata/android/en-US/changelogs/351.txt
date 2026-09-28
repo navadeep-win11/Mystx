@@ -1,0 +1,1 @@
+- fix: disable pdf.js Web Worker to prevent blank screen caused by Android WebView's failure to intercept Worker network requests
