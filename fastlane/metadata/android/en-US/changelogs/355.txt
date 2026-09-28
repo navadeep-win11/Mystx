@@ -1,0 +1,3 @@
+- fix: add missing LocalServer.kt for NanoHTTPD
+- feat: implement NanoHTTPD to host pdf.js locally, completely bypassing Android WebView interception bugs, scheme bugs, and Web Worker limitations
+- feat: replace brittle pdf.js implementation with Google's native androidx.pdf-viewer-fragment
