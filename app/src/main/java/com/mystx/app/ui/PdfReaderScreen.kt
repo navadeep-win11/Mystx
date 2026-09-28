@@ -11,12 +11,11 @@ import android.webkit.ConsoleMessage
 import android.webkit.JavascriptInterface
 import android.webkit.WebChromeClient
 import android.webkit.WebView
+
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
+
 import android.webkit.WebViewClient
-import android.os.Build
-import android.view.View
-import android.widget.FrameLayout
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.*
 import androidx.compose.foundation.background
@@ -42,89 +41,101 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import android.os.Build
+import android.view.View
+import android.widget.FrameLayout
 import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.pdf.viewer.fragment.PdfViewerFragment
+import android.os.Build
+import android.view.View
+import android.widget.FrameLayout
+import androidx.fragment.app.FragmentActivity
+import androidx.pdf.viewer.fragment.PdfViewerFragment
 import com.mystx.app.LocalServer
-import com.mystx.app.MystxViewModel
+import java.net.URLEncoder
+import com.mystx.app.api.GeminiClient
+import com.mystx.app.api.OpenAICompatibleClient
+import com.mystx.app.manager.KeyManager
+import com.mystx.app.model.HistoryManager
+import com.mystx.app.model.PrefKeys
+import com.mystx.app.service.CommandOutcome
+import com.mystx.app.service.runTextCommand
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
-import java.net.URLEncoder
 import kotlin.math.max
 import kotlin.math.roundToInt
-import androidx.pdf.viewer.fragment.PdfViewerFragment
 
-
+@SuppressLint("SetJavaScriptEnabled")
 @Composable
-fun PdfReaderScreen(pdfUri: Uri, onClose: () -> Unit) {
+fun PdfReaderScreen(
+    pdfUri: Uri,
+    onClose: () -> Unit
+) {
     val context = LocalContext.current
-    var isPopupVisible by remember { mutableStateOf(false) }
-    var selectedText by remember { mutableStateOf<String?>(null) }
-    val coroutineScope = rememberCoroutineScope()
     var localPdfPath by remember { mutableStateOf<String?>(null) }
     var server by remember { mutableStateOf<LocalServer?>(null) }
     var serverPort by remember { mutableStateOf<Int?>(null) }
-
     DisposableEffect(Unit) {
         onDispose {
             server?.stop()
         }
     }
 
+    var selectedText by remember { mutableStateOf<String?>(null) }
+    var isPopupVisible by remember { mutableStateOf(false) }
+
     LaunchedEffect(pdfUri) {
-        coroutineScope.launch {
-            withContext(Dispatchers.IO) {
-                try {
-                    val inputStream = context.contentResolver.openInputStream(pdfUri)
-                    val tempFile = File(context.cacheDir, "temp_viewer.pdf")
-                    val outputStream = FileOutputStream(tempFile)
-                    inputStream?.copyTo(outputStream)
-                    inputStream?.close()
-                    outputStream.close()
-                    
+        withContext(Dispatchers.IO) {
+            try {
+                val inputStream = context.contentResolver.openInputStream(pdfUri)
+                val tempFile = File(context.cacheDir, "temp_viewer.pdf")
+                if (server == null) {
                     if (Build.VERSION.SDK_INT < 31) {
-                        if (server == null) {
-                            val newServer = LocalServer(context)
-                            newServer.start()
-                            server = newServer
-                            serverPort = newServer.listeningPort
-                        }
+                        val newServer = LocalServer(context)
+                        newServer.start()
+                        server = newServer
+                        serverPort = newServer.listeningPort
                     }
-                    localPdfPath = tempFile.absolutePath
-                } catch (e: Exception) {
-                    e.printStackTrace()
                 }
+                val outputStream = FileOutputStream(tempFile)
+                inputStream?.copyTo(outputStream)
+                inputStream?.close()
+                outputStream.close()
+                localPdfPath = tempFile.absolutePath
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
+    }
+
+    BackHandler {
+        onClose()
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
         if (localPdfPath != null) {
             if (Build.VERSION.SDK_INT >= 31) {
-                // GOOGLE NATIVE PDF VIEWER FOR ANDROID 12+
                 AndroidView(
                     modifier = Modifier.fillMaxSize(),
                     factory = { ctx ->
                         val frameLayout = FrameLayout(ctx).apply {
                             id = View.generateViewId()
                         }
-                        
                         val activity = ctx as? FragmentActivity
                         if (activity != null) {
                             val fragment = PdfViewerFragment()
                             activity.supportFragmentManager.beginTransaction()
                                 .replace(frameLayout.id, fragment)
                                 .commit()
-                                
                             fragment.documentUri = pdfUri
                         }
                         frameLayout
                     }
                 )
             } else if (serverPort != null) {
-                // PDF.JS FALLBACK FOR ANDROID 11 AND BELOW
                 AndroidView(
                     modifier = Modifier.fillMaxSize(),
                     factory = { ctx ->
@@ -150,16 +161,7 @@ fun PdfReaderScreen(pdfUri: Uri, onClose: () -> Unit) {
                                         }
                                     }
                                 }
-                                
-                                @androidx.annotation.Keep
-                                @JavascriptInterface
-                                fun requestExplain() {
-                                    if (!selectedText.isNullOrEmpty()) {
-                                        isPopupVisible = true
-                                    }
-                                }
                             }
-                            
                             addJavascriptInterface(JsBridge(), "AndroidBridge")
 
                             webViewClient = object : WebViewClient() {
@@ -180,60 +182,57 @@ fun PdfReaderScreen(pdfUri: Uri, onClose: () -> Unit) {
                         }
                     }
                 )
+            } else {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             }
         } else {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         }
 
-        // Close button
-        SmallFloatingActionButton(
-            onClick = onClose,
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(top = 48.dp, end = 16.dp),
-            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)
+        // Aesthetic Floating Button that appears ONLY when text is selected
+        AnimatedVisibility(
+            visible = Build.VERSION.SDK_INT < 31 && selectedText != null && !isPopupVisible,
+            enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+            exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
+            modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 32.dp)
         ) {
-            Icon(Icons.Default.Close, contentDescription = "Close PDF")
-        }
-
-        // Animated Explain Button for Android 11 and below (Native PDF viewer uses global intent)
-        if (Build.VERSION.SDK_INT < 31) {
-            AnimatedVisibility(
-                visible = !selectedText.isNullOrEmpty() && !isPopupVisible,
-                enter = fadeIn() + slideInVertically(initialOffsetY = { it / 2 }),
-                exit = fadeOut() + slideOutVertically(targetOffsetY = { it / 2 }),
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 32.dp)
+            ExtendedFloatingActionButton(
+                onClick = {
+                    isPopupVisible = true
+                },
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                shape = RoundedCornerShape(24.dp)
             ) {
-                FloatingActionButton(
-                    onClick = { isPopupVisible = true },
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                ) {
-                    Text(
-                        "✨ Explain",
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+                Icon(Icons.Default.Search, contentDescription = null)
+                Spacer(Modifier.width(8.dp))
+                Text("✨ Explain")
             }
         }
 
-        // The draggable explanation popup window
-        AnimatedVisibility(
-            visible = isPopupVisible,
-            enter = fadeIn() + scaleIn(),
-            exit = fadeOut() + scaleOut(),
-            modifier = Modifier.align(Alignment.Center)
+        IconButton(
+            onClick = onClose,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(16.dp)
+                .background(Color.Black.copy(alpha = 0.5f), RoundedCornerShape(50))
         ) {
+            Icon(Icons.Default.Close, contentDescription = "Close PDF", tint = Color.White)
+        }
+
+        if (Build.VERSION.SDK_INT < 31 && isPopupVisible && selectedText != null) {
             DraggableExplainPopup(
-                selectedText = selectedText,
-                onClose = { isPopupVisible = false }
+                selectedText = selectedText!!,
+                onClose = { 
+                    isPopupVisible = false 
+                    selectedText = null
+                }
             )
         }
     }
 }
+
+@Composable
 fun DraggableExplainPopup(
     selectedText: String,
     onClose: () -> Unit
