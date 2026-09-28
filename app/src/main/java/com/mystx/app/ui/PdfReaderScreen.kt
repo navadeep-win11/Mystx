@@ -168,7 +168,7 @@ fun PdfReaderScreen(
                         }
 
                         val encodedFileUrl = URLEncoder.encode("http://127.0.0.1:$serverPort/cache/temp_viewer.pdf", "UTF-8")
-                        val viewerUrl = "http://127.0.0.1:$serverPort/assets/pdfjs/web/viewer.html?file=$encodedFileUrl#disableworker=true"
+                        val viewerUrl = "http://127.0.0.1:$serverPort/assets/pdfjs/web/viewer.html?file=$encodedFileUrl"
                         loadUrl(viewerUrl)
                     }
                 }
