@@ -1,0 +1,1 @@
+- fix: strip query parameters from intercepted url to prevent FileNotFoundException and ERR_NAME_NOT_RESOLVED in native WebView handler
