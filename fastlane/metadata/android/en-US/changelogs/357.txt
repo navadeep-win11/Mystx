@@ -1,0 +1,1 @@
+- fix: serve pdf.js assets with explicit Content-Length to prevent WebView chunked-encoding rendering failures on canvas
