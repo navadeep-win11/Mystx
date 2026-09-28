@@ -116,8 +116,7 @@ fun PdfReaderScreen(
                         settings.allowFileAccessFromFileURLs = true
                         settings.allowUniversalAccessFromFileURLs = true
                         settings.builtInZoomControls = true
-                        settings.displayZoomControls = false
-                            setLayerType(View.LAYER_TYPE_SOFTWARE, null)
+                        settings.displayZoomControls = false; setLayerType(View.LAYER_TYPE_SOFTWARE, null)
 
                         class JsBridge {
                             @androidx.annotation.Keep
