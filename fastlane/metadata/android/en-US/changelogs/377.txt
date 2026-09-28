@@ -1,0 +1,3 @@
+- fix: restore thinkingConfig that was accidentally removed
+- fix: unresolved trimmedKey reference in isInvalid function
+- fix: trim api keys on save to prevent leading/trailing spaces and remove thinkingConfig to prevent HTTP 400 with flash-lite
