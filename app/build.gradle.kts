@@ -103,6 +103,7 @@ android {
     }
     lint {
         disable += setOf("MissingTranslation", "LocalContextGetResourceValueCall")
+        abortOnError = false
     }
     packaging {
         resources {
@@ -147,8 +148,3 @@ dependencies {
     testImplementation("androidx.test:core-ktx:1.7.0")
 }
 
-android {
-    lint {
-        abortOnError = false
-    }
-}
