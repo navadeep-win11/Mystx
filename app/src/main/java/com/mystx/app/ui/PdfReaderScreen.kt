@@ -160,6 +160,19 @@ fun PdfReaderScreen(
                             override fun onPageFinished(view: WebView?, url: String?) {
                                 super.onPageFinished(view, url)
                                 view?.evaluateJavascript("""
+                                    window.onerror = function(msg, url, line) {
+                                        var d = document.createElement('div');
+                                        d.style.position = 'absolute';
+                                        d.style.top = '50px';
+                                        d.style.left = '10px';
+                                        d.style.background = 'red';
+                                        d.style.color = 'white';
+                                        d.style.zIndex = '9999';
+                                        d.style.fontSize = '16px';
+                                        d.style.padding = '10px';
+                                        d.innerHTML = 'JS Error: ' + msg + ' at line ' + line;
+                                        document.body.appendChild(d);
+                                    };
                                     document.addEventListener("selectionchange", function() {
                                         var text = window.getSelection().toString();
                                         window.AndroidBridge.onSelectionChanged(text);
@@ -168,7 +181,7 @@ fun PdfReaderScreen(
                             }
                         }
 
-                        val viewerUrl = "https://appassets.androidplatform.net/assets/pdfjs/web/viewer.html?file=https://appassets.androidplatform.net/cache/temp_viewer.pdf"
+                        val viewerUrl = "https://appassets.androidplatform.net/assets/pdfjs/web/viewer.html?file=https://appassets.androidplatform.net/cache/temp_viewer.pdf#disableworker=true"
                         loadUrl(viewerUrl)
                     }
                 }
