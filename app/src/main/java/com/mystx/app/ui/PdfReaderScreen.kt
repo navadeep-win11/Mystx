@@ -127,9 +127,10 @@ fun PdfReaderScreen(
                         webViewClient = object : WebViewClient() {
                             override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? {
                                 val url = request.url.toString()
+                                val cleanUrl = url.substringBefore('?').substringBefore('#')
                                 try {
-                                    if (url.startsWith("https://appassets.androidplatform.net/assets/")) {
-                                        val assetPath = url.substring("https://appassets.androidplatform.net/assets/".length)
+                                    if (cleanUrl.startsWith("https://appassets.androidplatform.net/assets/")) {
+                                        val assetPath = cleanUrl.substring("https://appassets.androidplatform.net/assets/".length)
                                         val mimeType = when {
                                             assetPath.endsWith(".html") -> "text/html"
                                             assetPath.endsWith(".js") -> "application/javascript"
@@ -140,7 +141,7 @@ fun PdfReaderScreen(
                                         }
                                         val inputStream = context.assets.open(assetPath)
                                         return WebResourceResponse(mimeType, "UTF-8", inputStream)
-                                    } else if (url.startsWith("https://appassets.androidplatform.net/cache/")) {
+                                    } else if (cleanUrl.startsWith("https://appassets.androidplatform.net/cache/")) {
                                         val file = java.io.File(localPdfPath!!)
                                         val inputStream = java.io.FileInputStream(file)
                                         return WebResourceResponse("application/pdf", "UTF-8", inputStream)
