@@ -201,7 +201,7 @@ class KeyManager internal constructor(
     private fun isInvalid(key: String): Boolean {
         val until = invalidKeys[key] ?: return false
         if (System.currentTimeMillis() >= until) {
-            invalidKeys.remove(trimmedKey)
+            invalidKeys.remove(key)
             return false
         }
         return true
