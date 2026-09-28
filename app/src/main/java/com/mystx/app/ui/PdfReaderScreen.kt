@@ -94,6 +94,7 @@ fun PdfReaderScreen(
                 factory = { ctx ->
                     WebView(ctx).apply {
                         settings.javaScriptEnabled = true
+                        settings.domStorageEnabled = true
                         settings.allowFileAccess = true
                         settings.allowFileAccessFromFileURLs = true
                         settings.allowUniversalAccessFromFileURLs = true
@@ -140,11 +141,15 @@ fun PdfReaderScreen(
                                             else -> "application/octet-stream"
                                         }
                                         val inputStream = context.assets.open(assetPath)
-                                        return WebResourceResponse(mimeType, "UTF-8", inputStream)
+                                        return WebResourceResponse(mimeType, "UTF-8", inputStream).apply {
+                                            responseHeaders = mapOf("Access-Control-Allow-Origin" to "*")
+                                        }
                                     } else if (cleanUrl.startsWith("https://appassets.androidplatform.net/cache/")) {
                                         val file = java.io.File(localPdfPath!!)
                                         val inputStream = java.io.FileInputStream(file)
-                                        return WebResourceResponse("application/pdf", "UTF-8", inputStream)
+                                        return WebResourceResponse("application/pdf", "UTF-8", inputStream).apply {
+                                            responseHeaders = mapOf("Access-Control-Allow-Origin" to "*")
+                                        }
                                     }
                                 } catch (e: Exception) {
                                     e.printStackTrace()
