@@ -230,6 +230,11 @@ class GeminiClient {
                 val seconds = retryAfter?.toIntOrNull()
                 val msg = if (seconds != null) "Rate limit exceeded, retry after ${seconds}s" else "Rate limit exceeded"
                 Result.failure(ApiException(ApiError.RateLimit(msg, seconds), msg))
+            } else if (responseCode == 503) {
+                val errorBody = ApiClientUtils.readErrorBody(connection)
+                val apiMessage = ApiClientUtils.extractApiErrorMessage(errorBody)
+                val detail = if (apiMessage.isNotEmpty()) apiMessage else "Model unavailable due to high demand"
+                Result.failure(ApiException(ApiError.ServerError(detail), detail))
             } else if (responseCode == 400 || responseCode == 422) {
                 val errorBody = ApiClientUtils.readErrorBody(connection)
                 val apiMessage = ApiClientUtils.extractApiErrorMessage(errorBody)

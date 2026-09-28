@@ -27,6 +27,9 @@ object ErrorMessages {
             lower.contains("signin_required") || lower.contains("not currently signed in") ||
                 lower.contains("signin_url") ->
                 R.string.error_provider_auth_required
+            lower.contains("high demand") || lower.contains("overloaded") ||
+                lower.contains("503") || lower.contains("unavailable") && lower.contains("model") ->
+                R.string.error_model_overloaded
             lower.contains("rate limit") || lower.contains("resource_exhausted") || lower.contains("quota") ->
                 R.string.error_rate_limited
             // Must come AFTER the rate-limit branch is skipped for these: Groq's 413 body reads

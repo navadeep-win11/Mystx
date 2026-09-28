@@ -134,6 +134,7 @@
     <string name="error_timeout_connection">Request timed out. Check your connection.</string>
     <string name="error_no_internet">No internet connection.</string>
     <string name="error_endpoint_unreachable">Could not reach the API. Check your endpoint URL.</string>
+    <string name="error_model_overloaded">Model is busy due to high demand. Try switching to a different model in Settings.</string>
     <string name="error_bad_request">Request failed. Check your settings.</string>
     <!-- TODO translate: new string, falls back to English in the other 50 locales until then.
          Added because HTTP 413 was previously reported as "Rate limited. Try again shortly.",
