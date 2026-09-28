@@ -14,6 +14,7 @@ import android.webkit.WebView
 import android.view.View
 
 import android.webkit.WebResourceRequest
+import android.webkit.WebResourceError
 import android.webkit.WebResourceResponse
 
 import android.webkit.WebViewClient
@@ -69,6 +70,7 @@ fun PdfReaderScreen(
     var localPdfPath by remember { mutableStateOf<String?>(null) }
     var server by remember { mutableStateOf<LocalServer?>(null) }
     var serverPort by remember { mutableStateOf<Int?>(null) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
     DisposableEffect(Unit) {
         onDispose {
             server?.stop()
@@ -96,6 +98,7 @@ fun PdfReaderScreen(
                 localPdfPath = tempFile.absolutePath
             } catch (e: Exception) {
                 e.printStackTrace()
+                errorMessage = e.stackTraceToString()
             }
         }
     }
@@ -105,7 +108,11 @@ fun PdfReaderScreen(
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-            if (localPdfPath != null && serverPort != null) {
+                    if (errorMessage != null) {
+            Column(modifier = Modifier.align(Alignment.Center).padding(16.dp)) {
+                Text("Error opening PDF:\n$errorMessage", color = Color.Red)
+            }
+        } else if (localPdfPath != null && serverPort != null) {
             AndroidView(
                 modifier = Modifier.fillMaxSize(),
                 factory = { ctx ->
