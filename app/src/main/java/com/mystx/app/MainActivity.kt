@@ -65,7 +65,7 @@ enum class Tab(@param:StringRes val titleRes: Int, val icon: ImageVector) {
     Settings(R.string.settings_title, Icons.Default.Settings)
 }
 
-class MainActivity : ComponentActivity() {
+class MainActivity : androidx.appcompat.app.AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
