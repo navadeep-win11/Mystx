@@ -1,3 +1,4 @@
+@file:SuppressLint("NewApi")
 package com.mystx.app.ui
 
 import android.annotation.SuppressLint
@@ -64,6 +65,7 @@ import kotlin.math.max
 import kotlin.math.roundToInt
 
 @SuppressLint("SetJavaScriptEnabled")
+@SuppressLint("NewApi")
 @Composable
 fun PdfReaderScreen(
     pdfUri: Uri,
@@ -227,6 +229,7 @@ fun PdfReaderScreen(
     }
 }
 
+@SuppressLint("NewApi")
 @Composable
 fun DraggableExplainPopup(
     selectedText: String,
