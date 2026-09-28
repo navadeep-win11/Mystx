@@ -1,0 +1,5 @@
+- fix: combine SuppressLint annotations to resolve non-repeatable annotation error
+- fix: suppress NewApi lint error for PdfViewerFragment to allow compilation
+- fix: remove duplicate imports to resolve ambiguous name build error
+- fix: correct visibility logic and restore composable popup to fix build
+- feat: implement dual native AND local server fallback pdf approach to support all API levels
