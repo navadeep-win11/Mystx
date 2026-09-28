@@ -1,0 +1,1 @@
+- fix: enable domStorageEnabled to prevent pdf.js initialization crash, and add CORS headers to manual interceptor
