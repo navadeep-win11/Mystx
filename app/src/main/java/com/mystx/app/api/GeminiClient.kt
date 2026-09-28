@@ -137,6 +137,11 @@ class GeminiClient {
                     put("temperature", temperature)
                     // Spec-driven thinking control (mirrors Groq reasoning params).
                     // "minimal" keeps latency low; null => send no thinkingConfig.
+                    if (thinkingLevel != null) {
+                        put("thinkingConfig", JSONObject().apply {
+                            put("thinkingLevel", thinkingLevel)
+                        })
+                    }
                     if (withStructured) {
                         put("responseMimeType", "application/json")
                         put("responseSchema", JSONObject().apply {
