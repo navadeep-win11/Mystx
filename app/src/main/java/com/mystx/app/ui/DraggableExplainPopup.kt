@@ -119,7 +119,7 @@ fun DraggableExplainPopup(
             .shadow(elevation = 12.dp, shape = RoundedCornerShape(16.dp))
             .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f), RoundedCornerShape(16.dp))
             .clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.98f))
+            .background(MaterialTheme.colorScheme.background.copy(alpha = 0.95f))
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             Row(

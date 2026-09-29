@@ -149,7 +149,7 @@ fun QuickExplainScreen(selectedText: String, onClose: () -> Unit, onDrag: (Float
                 }
             },
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.95f))
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background.copy(alpha = 0.95f))
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
