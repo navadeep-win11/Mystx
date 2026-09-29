@@ -200,7 +200,6 @@
     <string name="history_title">History</string>
     <string name="mystx_commands">mystx2</string>
     <string name="mystx_explain">mystx1</string>
-    <string name="app_name">PDF Viewer</string>
     <!--<string name="action_settings">Settings</string>-->
     <string name="action_previous">Previous page</string>
     <string name="action_next">Next page</string>
