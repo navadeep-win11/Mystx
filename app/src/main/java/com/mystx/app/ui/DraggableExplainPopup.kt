@@ -151,7 +151,7 @@ fun DraggableExplainPopup(
                     }
                 } else {
                     Text(
-                        text = result ?: "",
+                        text = if (result.isNullOrBlank()) "Fetching answer... (If this stays forever, check API key)" else result!!,
                         fontSize = 15.sp,
                         color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.verticalScroll(rememberScrollState()).padding(bottom = 24.dp)
