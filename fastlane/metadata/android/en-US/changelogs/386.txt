@@ -1,0 +1,1 @@
+- feat: show Mystx Explain popup immediately upon text selection
