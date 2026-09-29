@@ -67,8 +67,8 @@ fun DraggableExplainPopup(
                 Analyze the following text:
                 "${selectedText}"
                 
-                If it is a single word or short phrase, provide its meaning and a simple example sentence.
-                If it is a question, provide a concise answer.
+                If it is a single word or short phrase (like a name, URL, or domain), provide its meaning or identify what it is.
+                If it is a question, provide a concise answer. Do not refuse to answer.
                 Please respond natively in ${lang}.
             """.trimIndent()
 
