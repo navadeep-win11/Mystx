@@ -31,7 +31,7 @@ fun PdfReaderScreen(
         viewModel.resetDocumentState()
     }
 
-    Box(modifier = Modifier.fillMaxSize().background(androidx.compose.ui.graphics.Color(0xFFE5E5E5))) {
+    Box(modifier = Modifier.fillMaxSize()) {
         PdfViewerScreen(
             viewModel = viewModel,
             initialMimeError = false,
