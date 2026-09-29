@@ -80,10 +80,12 @@ class QuickExplainActivity : ComponentActivity() {
 fun QuickExplainScreen(selectedText: String, onClose: () -> Unit, onDrag: (Float, Float) -> Unit) {
     var result by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(true) }
+    var triggerFetch by remember { mutableStateOf(0) }
+    var skipCache by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val context = androidx.compose.ui.platform.LocalContext.current
 
-    LaunchedEffect(selectedText) {
+    LaunchedEffect(selectedText, triggerFetch) {
         // Run AI request
         withContext(Dispatchers.IO) {
             val keyManager = KeyManager(context)
@@ -103,7 +105,7 @@ fun QuickExplainScreen(selectedText: String, onClose: () -> Unit, onDrag: (Float
                 Please respond natively in ${lang}.
             """.trimIndent()
 
-            val cached = HistoryManager.findCachedResponse(context, selectedText, "QuickExplain")
+            val cached = if (skipCache) null else HistoryManager.findCachedResponse(context, selectedText, "QuickExplain")
             if (!cached.isNullOrBlank()) {
                 withContext(Dispatchers.Main) {
                     isLoading = false
@@ -159,11 +161,24 @@ fun QuickExplainScreen(selectedText: String, onClose: () -> Unit, onDrag: (Float
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
                 )
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = "Close",
-                    modifier = Modifier.clickable { onClose() }
-                )
+                Row(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                    if (!isLoading) {
+                        Icon(
+                            androidx.compose.material.icons.Icons.Default.Refresh, 
+                            contentDescription = "Regenerate",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.clickable { 
+                                skipCache = true
+                                triggerFetch++
+                            }
+                        )
+                    }
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Close",
+                        modifier = Modifier.clickable { onClose() }
+                    )
+                }
             }
             Spacer(modifier = Modifier.height(12.dp))
             Text(

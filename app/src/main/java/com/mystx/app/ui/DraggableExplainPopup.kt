@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -54,8 +55,10 @@ fun DraggableExplainPopup(
 
     var result by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(true) }
+    var triggerFetch by remember { mutableStateOf(0) }
+    var skipCache by remember { mutableStateOf(false) }
 
-    LaunchedEffect(selectedText) {
+    LaunchedEffect(selectedText, triggerFetch) {
         isLoading = true
         withContext(Dispatchers.IO) {
             val keyManager = KeyManager(context)
@@ -74,7 +77,7 @@ fun DraggableExplainPopup(
                 Please respond natively in ${lang}.
             """.trimIndent()
 
-            val cached = HistoryManager.findCachedResponse(context, selectedText, "QuickExplain")
+            val cached = if (skipCache) null else HistoryManager.findCachedResponse(context, selectedText, "QuickExplain")
             if (!cached.isNullOrBlank()) {
                 withContext(Dispatchers.Main) {
                     isLoading = false
@@ -83,14 +86,10 @@ fun DraggableExplainPopup(
             } else {
 
             val outcome = try {
-                withTimeout(15_000L) {
-                    runTextCommand(
-                        context, keyManager, geminiClient, openAIClient,
-                        prompt, selectedText
-                    )
-                }
-            } catch (e: TimeoutCancellationException) {
-                CommandOutcome.Failure("Network timeout (15s). The AI is not responding.")
+                runTextCommand(
+                    context, keyManager, geminiClient, openAIClient,
+                    prompt, selectedText
+                )
             } catch (e: Exception) {
                 CommandOutcome.Failure("Error: ${e.message}")
             }
@@ -139,7 +138,20 @@ fun DraggableExplainPopup(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text("✨ Mystx Explain", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary, fontSize = 14.sp)
-                Icon(Icons.Default.Close, contentDescription = "Close", modifier = Modifier.clickable { onClose() })
+                Row(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                    if (!isLoading) {
+                        Icon(
+                            Icons.Default.Refresh, 
+                            contentDescription = "Regenerate",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.clickable { 
+                                skipCache = true
+                                triggerFetch++
+                            }
+                        )
+                    }
+                    Icon(Icons.Default.Close, contentDescription = "Close", modifier = Modifier.clickable { onClose() })
+                }
             }
             
             Column(modifier = Modifier.padding(16.dp).weight(1f)) {
