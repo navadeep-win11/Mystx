@@ -152,7 +152,16 @@ fun PdfReaderScreen(
                                 view: WebView,
                                 request: WebResourceRequest
                             ): WebResourceResponse? {
-                                return assetLoader.shouldInterceptRequest(request.url)
+                                val response = assetLoader.shouldInterceptRequest(request.url)
+                                if (response != null) {
+                                    var headers = response.responseHeaders
+                                    if (headers == null) {
+                                        headers = mutableMapOf()
+                                    }
+                                    headers["Access-Control-Allow-Origin"] = "*"
+                                    response.responseHeaders = headers
+                                }
+                                return response
                             }
 
                             override fun onPageFinished(view: WebView, url: String) {
@@ -180,7 +189,7 @@ fun PdfReaderScreen(
                         }
 
                         // Use standard URL encoding for the file parameter
-                        val encodedFileUrl = URLEncoder.encode("https://appassets.androidplatform.net/cache/temp_viewer.pdf", "UTF-8")
+                        val encodedFileUrl = URLEncoder.encode("/cache/temp_viewer.pdf", "UTF-8")
                         val viewerUrl = "https://appassets.androidplatform.net/assets/pdfjs/web/viewer.html?file=$encodedFileUrl"
                         loadUrl(viewerUrl)
                     }
