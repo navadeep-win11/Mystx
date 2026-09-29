@@ -228,7 +228,7 @@ fun PdfViewerScreen(
     initialMimeError: Boolean = false,
     onRequestRecreate: () -> Unit = {},
     onWebViewCreated: (WebView) -> Unit = {},
-    onWebViewDestroyed: () -> Unit, onSelectionChanged: (String) -> Unit = {} = {}
+    onWebViewDestroyed: () -> Unit, onSelectionChanged: (String) -> Unit = {}
 ) {
     val context = LocalContext.current
     val activity = context as Activity
@@ -995,7 +995,7 @@ private fun PdfTopAppBar(
                             Icon(Icons.Outlined.Info, contentDescription = null)
                         }
                     )
-                    if (BuildConfig.DEBUG) {
+                    if (false) {
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.debug_action_toggle_text_layer_visibility)) },
                             onClick = { onMenuToggle(false); onToggleTextLayer() },
