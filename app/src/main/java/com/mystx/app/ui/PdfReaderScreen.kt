@@ -116,7 +116,7 @@ fun PdfReaderScreen(
                         settings.builtInZoomControls = true
                         settings.displayZoomControls = false; setLayerType(View.LAYER_TYPE_SOFTWARE, null)
 
-                        class JsBridge {
+                                                class JsBridge {
                             @androidx.annotation.Keep
                             @JavascriptInterface
                             fun onSelectionChanged(text: String) {
@@ -130,8 +130,32 @@ fun PdfReaderScreen(
                                     }
                                 }
                             }
+                            
+                            // GrapheneOS mocks
+                            @androidx.annotation.Keep @JavascriptInterface fun getPage(): Int = 1
+                            @androidx.annotation.Keep @JavascriptInterface fun getZoomRatio(): Float = 1.0f
+                            @androidx.annotation.Keep @JavascriptInterface fun getDocumentOrientationDegrees(): Int = 0
+                            @androidx.annotation.Keep @JavascriptInterface fun getInsetLeft(): Int = 0
+                            @androidx.annotation.Keep @JavascriptInterface fun getInsetTop(): Int = 0
+                            @androidx.annotation.Keep @JavascriptInterface fun getInsetRight(): Int = 0
+                            @androidx.annotation.Keep @JavascriptInterface fun getInsetBottom(): Int = 0
+                            @androidx.annotation.Keep @JavascriptInterface fun getMaxRenderPixels(): Int = 10000000
+                            @androidx.annotation.Keep @JavascriptInterface fun getPassword(): String = ""
+                            @androidx.annotation.Keep @JavascriptInterface fun showPasswordPrompt() {}
+                            @androidx.annotation.Keep @JavascriptInterface fun invalidPassword() {}
+                            @androidx.annotation.Keep @JavascriptInterface fun onLoaded() {}
+                            @androidx.annotation.Keep @JavascriptInterface fun setNumPages(pages: Int) {}
+                            @androidx.annotation.Keep @JavascriptInterface fun setDocumentProperties(props: String) {}
+                            @androidx.annotation.Keep @JavascriptInterface fun setHasDocumentOutline(has: Boolean) {}
+                            @androidx.annotation.Keep @JavascriptInterface fun onLoadError() {}
+                            @androidx.annotation.Keep @JavascriptInterface fun setZoomRatio(zoom: Float) {}
+                            @androidx.annotation.Keep @JavascriptInterface fun getZoomFocusX(): Float = 0f
+                            @androidx.annotation.Keep @JavascriptInterface fun getZoomFocusY(): Float = 0f
+                            @androidx.annotation.Keep @JavascriptInterface fun getMaxZoomRatio(): Float = 5.0f
+                            @androidx.annotation.Keep @JavascriptInterface fun getMinZoomRatio(): Float = 0.5f
+                            @androidx.annotation.Keep @JavascriptInterface fun setDocumentOutline(outline: String?) {}
                         }
-                        addJavascriptInterface(JsBridge(), "AndroidBridge")
+                        addJavascriptInterface(JsBridge(), "channel")
 
                         webChromeClient = object : WebChromeClient() {
                             override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
@@ -142,9 +166,28 @@ fun PdfReaderScreen(
                         
                         
 
-                        val assetLoader = WebViewAssetLoader.Builder()
-                            .addPathHandler("/assets/", WebViewAssetLoader.AssetsPathHandler(ctx))
-                            .addPathHandler("/cache/", WebViewAssetLoader.InternalStoragePathHandler(ctx, ctx.cacheDir))
+                                                val assetLoader = WebViewAssetLoader.Builder()
+                            .setDomain("localhost")
+                            .addPathHandler("/viewer/", object : WebViewAssetLoader.PathHandler {
+                                val delegate = WebViewAssetLoader.AssetsPathHandler(ctx)
+                                override fun handle(path: String): WebResourceResponse? {
+                                    return delegate.handle("viewer/" + path)
+                                }
+                            })
+                            .addPathHandler("/placeholder.pdf", object : WebViewAssetLoader.PathHandler {
+                                override fun handle(path: String): WebResourceResponse? {
+                                    return try {
+                                        val file = java.io.File(ctx.cacheDir, "temp_viewer.pdf")
+                                        val response = WebResourceResponse("application/pdf", null, java.io.FileInputStream(file))
+                                        val headers = mutableMapOf<String, String>()
+                                        headers["Access-Control-Allow-Origin"] = "*"
+                                        response.responseHeaders = headers
+                                        response
+                                    } catch (e: Exception) {
+                                        null
+                                    }
+                                }
+                            })
                             .build()
 
                         webViewClient = object : WebViewClientCompat() {
@@ -180,18 +223,32 @@ fun PdfReaderScreen(
                                         d.innerHTML = 'JS Error: ' + msg + ' at line ' + line;
                                         document.body.appendChild(d);
                                     };
+                                    // Make text selectable
+                                    var style = document.createElement('style');
+                                    style.innerHTML = '.textLayer { touch-action: auto !important; }';
+                                    document.head.appendChild(style);
+                                    
                                     document.addEventListener("selectionchange", function() {
                                         var text = window.getSelection().toString();
-                                        window.AndroidBridge.onSelectionChanged(text);
+                                        window.channel.onSelectionChanged(text);
                                     });
+                                    
+                                    // Start GrapheneOS document load
+                                    if (typeof window.loadDocument === 'function') {
+                                        window.loadDocument();
+                                    } else {
+                                        setTimeout(function() {
+                                            if (typeof window.loadDocument === 'function') {
+                                                window.loadDocument();
+                                            }
+                                        }, 500);
+                                    }
                                 """.trimIndent(), null)
                             }
                         }
 
                         // Use standard URL encoding for the file parameter
-                        val encodedFileUrl = URLEncoder.encode("/cache/temp_viewer.pdf", "UTF-8")
-                        val viewerUrl = "https://appassets.androidplatform.net/assets/pdfjs/web/viewer.html?file=$encodedFileUrl"
-                        loadUrl(viewerUrl)
+                        loadUrl("https://localhost/viewer/index.html")
                     }
                 }
             )
