@@ -18,6 +18,9 @@ import android.webkit.WebResourceError
 import android.webkit.WebResourceResponse
 
 import android.webkit.WebViewClient
+
+import androidx.webkit.WebViewAssetLoader
+import androidx.webkit.WebViewClientCompat
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.*
 import androidx.compose.foundation.background
@@ -43,7 +46,6 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
-import com.mystx.app.LocalServer
 import java.net.URLEncoder
 import com.mystx.app.api.GeminiClient
 import com.mystx.app.api.OpenAICompatibleClient
@@ -69,13 +71,7 @@ fun PdfReaderScreen(
     val context = LocalContext.current
     var localPdfPath by remember { mutableStateOf<String?>(null) }
     var server by remember { mutableStateOf<LocalServer?>(null) }
-    var serverPort by remember { mutableStateOf<Int?>(null) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
-    DisposableEffect(Unit) {
-        onDispose {
-            server?.stop()
-        }
-    }
+        var errorMessage by remember { mutableStateOf<String?>(null) }
 
     var selectedText by remember { mutableStateOf<String?>(null) }
     var isPopupVisible by remember { mutableStateOf(false) }
@@ -85,12 +81,7 @@ fun PdfReaderScreen(
             try {
                 val inputStream = context.contentResolver.openInputStream(pdfUri)
                 val tempFile = File(context.cacheDir, "temp_viewer.pdf")
-                if (server == null) {
-                    val newServer = LocalServer(context)
-                    newServer.start()
-                    server = newServer
-                    serverPort = newServer.listeningPort
-                }
+
                 val outputStream = FileOutputStream(tempFile)
                 inputStream?.copyTo(outputStream)
                 inputStream?.close()
@@ -112,7 +103,7 @@ fun PdfReaderScreen(
             Column(modifier = Modifier.align(Alignment.Center).padding(16.dp)) {
                 Text("Error opening PDF:\n$errorMessage", color = Color.Red)
             }
-        } else if (localPdfPath != null && serverPort != null) {
+        } else if (localPdfPath != null) {
             AndroidView(
                 modifier = Modifier.fillMaxSize(),
                 factory = { ctx ->
@@ -149,11 +140,23 @@ fun PdfReaderScreen(
 
                         
                         
-                        webViewClient = object : WebViewClient() {
 
-                            override fun onPageFinished(view: WebView?, url: String?) {
+                        val assetLoader = WebViewAssetLoader.Builder()
+                            .addPathHandler("/assets/", WebViewAssetLoader.AssetsPathHandler(ctx))
+                            .addPathHandler("/cache/", WebViewAssetLoader.InternalStoragePathHandler(ctx, ctx.cacheDir))
+                            .build()
+
+                        webViewClient = object : WebViewClientCompat() {
+                            override fun shouldInterceptRequest(
+                                view: WebView,
+                                request: WebResourceRequest
+                            ): WebResourceResponse? {
+                                return assetLoader.shouldInterceptRequest(request.url)
+                            }
+
+                            override fun onPageFinished(view: WebView, url: String) {
                                 super.onPageFinished(view, url)
-                                view?.evaluateJavascript("""
+                                view.evaluateJavascript("""
                                     window.onerror = function(msg, url, line) {
                                         var d = document.createElement('div');
                                         d.style.position = 'absolute';
@@ -175,8 +178,9 @@ fun PdfReaderScreen(
                             }
                         }
 
-                        val encodedFileUrl = URLEncoder.encode("http://127.0.0.1:$serverPort/cache/temp_viewer.pdf", "UTF-8")
-                        val viewerUrl = "http://127.0.0.1:$serverPort/assets/pdfjs/web/viewer.html?file=$encodedFileUrl"
+                        // Use standard URL encoding for the file parameter
+                        val encodedFileUrl = URLEncoder.encode("https://appassets.androidplatform.net/cache/temp_viewer.pdf", "UTF-8")
+                        val viewerUrl = "https://appassets.androidplatform.net/assets/pdfjs/web/viewer.html?file=$encodedFileUrl"
                         loadUrl(viewerUrl)
                     }
                 }
