@@ -1,0 +1,1 @@
+- fix: show explicit message when popup result is empty
