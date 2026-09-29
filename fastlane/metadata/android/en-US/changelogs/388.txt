@@ -1,0 +1,1 @@
+- fix: resolve PDF blank screen by adding CORS headers to WebViewAssetLoader
