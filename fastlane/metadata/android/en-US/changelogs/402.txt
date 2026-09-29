@@ -1,0 +1,3 @@
+- fix: resolve missing dp import in PdfReaderScreen
+- fix: restore PDF background and add shadow/border to explain popup
+- feat: Add Mystx Explain FAB on PDF selection and fix popup crashes
