@@ -1,0 +1,1 @@
+- fix: change explain popup background to background color to prevent white-on-white text invisibility
