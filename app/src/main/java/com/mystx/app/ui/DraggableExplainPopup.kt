@@ -154,7 +154,7 @@ fun DraggableExplainPopup(
                         text = result ?: "",
                         fontSize = 15.sp,
                         color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.verticalScroll(rememberScrollState())
+                        modifier = Modifier.verticalScroll(rememberScrollState()).padding(bottom = 24.dp)
                     )
                 }
             }

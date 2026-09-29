@@ -60,7 +60,7 @@ fun PdfReaderScreen(
             visible = isExplainButtonVisible && !isPopupVisible,
             enter = fadeIn() + scaleIn(),
             exit = fadeOut() + scaleOut(),
-            modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 32.dp)
+            modifier = Modifier.align(Alignment.TopCenter).padding(top = 100.dp)
         ) {
             ExtendedFloatingActionButton(
                 onClick = {
