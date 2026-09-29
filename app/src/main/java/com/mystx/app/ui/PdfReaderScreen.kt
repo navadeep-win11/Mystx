@@ -70,7 +70,7 @@ fun PdfReaderScreen(
 ) {
     val context = LocalContext.current
     var localPdfPath by remember { mutableStateOf<String?>(null) }
-    var server by remember { mutableStateOf<LocalServer?>(null) }
+
         var errorMessage by remember { mutableStateOf<String?>(null) }
 
     var selectedText by remember { mutableStateOf<String?>(null) }
