@@ -1,4 +1,7 @@
 package com.mystx.app.ui
+import androidx.compose.material3.*
+import androidx.compose.foundation.background
+import androidx.compose.ui.Alignment
 
 import android.net.Uri
 import androidx.compose.animation.*
@@ -18,15 +21,17 @@ fun PdfReaderScreen(
     val context = LocalContext.current
     val viewModel: PdfViewModel = viewModel()
     
+    
     var selectedText by remember { mutableStateOf<String?>(null) }
     var isPopupVisible by remember { mutableStateOf(false) }
+    var isExplainButtonVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(pdfUri) {
         viewModel.setUri(pdfUri)
         viewModel.resetDocumentState()
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier.fillMaxSize().background(androidx.compose.ui.graphics.Color(0xFFE5E5E5))) {
         PdfViewerScreen(
             viewModel = viewModel,
             initialMimeError = false,
@@ -37,14 +42,36 @@ fun PdfReaderScreen(
                 val trimmed = text.trim()
                 if (trimmed.isNotEmpty() && trimmed != "null") {
                     selectedText = trimmed
-                    isPopupVisible = true
+                    if (!isPopupVisible) {
+                        isExplainButtonVisible = true
+                    }
                 } else {
+                    isExplainButtonVisible = false
                     if (!isPopupVisible) {
                         selectedText = null
                     }
                 }
             }
         )
+
+        
+        AnimatedVisibility(
+            visible = isExplainButtonVisible && !isPopupVisible,
+            enter = fadeIn() + scaleIn(),
+            exit = fadeOut() + scaleOut(),
+            modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 32.dp)
+        ) {
+            ExtendedFloatingActionButton(
+                onClick = {
+                    isExplainButtonVisible = false
+                    isPopupVisible = true
+                },
+                icon = { Text("✨") },
+                text = { Text("Mystx Explain", fontWeight = androidx.compose.ui.text.font.FontWeight.Bold) },
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+            )
+        }
 
         AnimatedVisibility(
             visible = isPopupVisible,

@@ -78,10 +78,14 @@ fun DraggableExplainPopup(
                 }
             } else {
 
-            val outcome = runTextCommand(
-                context, keyManager, geminiClient, openAIClient,
-                prompt, selectedText
-            )
+            val outcome = try {
+                runTextCommand(
+                    context, keyManager, geminiClient, openAIClient,
+                    prompt, selectedText
+                )
+            } catch (e: Exception) {
+                CommandOutcome.Failure("Error: ${e.message}")
+            }
             
             withContext(Dispatchers.Main) {
                 isLoading = false
