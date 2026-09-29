@@ -104,7 +104,7 @@ fun QuickExplainScreen(selectedText: String, onClose: () -> Unit, onDrag: (Float
             """.trimIndent()
 
             val cached = HistoryManager.findCachedResponse(context, selectedText, "QuickExplain")
-            if (cached != null) {
+            if (!cached.isNullOrBlank()) {
                 withContext(Dispatchers.Main) {
                     isLoading = false
                     result = cached
@@ -123,7 +123,9 @@ fun QuickExplainScreen(selectedText: String, onClose: () -> Unit, onDrag: (Float
                     is CommandOutcome.Success -> {
                         result = outcome.text
                         // Save to history (isSelection = true)
-                        HistoryManager.addEntry(context, selectedText, "QuickExplain", outcome.text, true)
+                        if (outcome.text.isNotBlank()) {
+                            HistoryManager.addEntry(context, selectedText, "QuickExplain", outcome.text, true)
+                        }
                     }
                     is CommandOutcome.Failure -> result = outcome.message
                     is CommandOutcome.Refusal -> result = "Safety blocked"

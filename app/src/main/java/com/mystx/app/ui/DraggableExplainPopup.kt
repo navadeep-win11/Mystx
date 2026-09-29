@@ -73,7 +73,7 @@ fun DraggableExplainPopup(
             """.trimIndent()
 
             val cached = HistoryManager.findCachedResponse(context, selectedText, "QuickExplain")
-            if (cached != null) {
+            if (!cached.isNullOrBlank()) {
                 withContext(Dispatchers.Main) {
                     isLoading = false
                     result = cached
@@ -94,7 +94,9 @@ fun DraggableExplainPopup(
                 when (outcome) {
                     is CommandOutcome.Success -> {
                         result = outcome.text
-                        HistoryManager.addEntry(context, selectedText, "QuickExplain", outcome.text, true)
+                        if (outcome.text.isNotBlank()) {
+                            HistoryManager.addEntry(context, selectedText, "QuickExplain", outcome.text, true)
+                        }
                     }
                     is CommandOutcome.Failure -> result = outcome.message
                     is CommandOutcome.Refusal -> result = "Safety blocked"
@@ -151,7 +153,7 @@ fun DraggableExplainPopup(
                     }
                 } else {
                     Text(
-                        text = if (result.isNullOrBlank()) "Fetching answer... (If this stays forever, check API key)" else result!!,
+                        text = if (result.isNullOrBlank()) "No answer received from AI. It might have been blocked or returned empty. Try selecting different text." else result!!,
                         fontSize = 15.sp,
                         color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.verticalScroll(rememberScrollState()).padding(bottom = 24.dp)
