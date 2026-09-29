@@ -112,7 +112,7 @@ class ErrorMessagesTest {
         assertEquals(R.string.error_no_internet, ErrorMessages.map("Unable to resolve host \"api.groq.com\""))
         assertEquals(R.string.error_no_internet, ErrorMessages.map("Connection reset by peer"))
         assertEquals(R.string.error_endpoint_unreachable, ErrorMessages.map("Connection refused"))
-        assertEquals(R.string.error_endpoint_unreachable, ErrorMessages.map("HTTP_503: Service Unavailable"))
+        assertEquals(R.string.error_model_overloaded, ErrorMessages.map("HTTP_503: Service Unavailable"))
     }
 
     @Test
