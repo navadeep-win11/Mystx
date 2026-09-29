@@ -26,6 +26,19 @@ import kotlin.math.roundToInt
 import com.mystx.app.provider.ModelProviderFactory
 import com.mystx.app.provider.ProviderConfig
 
+import com.mystx.app.preferences.KeyManager
+import com.mystx.app.preferences.PrefKeys
+import com.mystx.app.history.HistoryManager
+import com.mystx.app.history.CommandOutcome
+import com.mystx.app.network.GeminiClient
+import com.mystx.app.network.OpenAICompatibleClient
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
+import kotlin.math.max
+import android.content.Context
+import com.mystx.app.service.runTextCommand
+
+
 @Composable
 fun DraggableExplainPopup(
     selectedText: String,
