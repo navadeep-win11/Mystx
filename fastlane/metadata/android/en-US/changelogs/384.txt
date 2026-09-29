@@ -1,0 +1,5 @@
+- fix: remove leftover LocalServer state variable in PdfReaderScreen
+- fix: replace NanoHTTPD with androidx.webkit.WebViewAssetLoader
+- fix: update tests for new default model and 503 error handling
+- fix: revert to pdf.js to restore text selection capability
+- feat: replace pdf.js with native Pdfium viewer + proper 503 error handling + default to gemini-3.6-flash
