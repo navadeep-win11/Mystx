@@ -1,0 +1,2 @@
+- feat: completely replace pdf.js with GrapheneOS PdfViewer
+- fix: resolve PDF blank screen by adding CORS headers to WebViewAssetLoader
