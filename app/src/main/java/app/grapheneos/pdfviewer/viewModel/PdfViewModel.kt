@@ -9,7 +9,6 @@ import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.mystx.app.R
 import app.grapheneos.pdfviewer.outline.OutlineNode
 import app.grapheneos.pdfviewer.properties.DEFAULT_VALUE
 import app.grapheneos.pdfviewer.properties.DocumentPropertiesRetriever

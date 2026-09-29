@@ -23,15 +23,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
-import com.mystx.app.provider.ModelProviderFactory
-import com.mystx.app.provider.ProviderConfig
 
-import com.mystx.app.preferences.KeyManager
-import com.mystx.app.preferences.PrefKeys
-import com.mystx.app.history.HistoryManager
-import com.mystx.app.history.CommandOutcome
-import com.mystx.app.network.GeminiClient
-import com.mystx.app.network.OpenAICompatibleClient
+import com.mystx.app.manager.KeyManager
+import com.mystx.app.model.PrefKeys
+import com.mystx.app.model.HistoryManager
+import com.mystx.app.service.CommandOutcome
+import com.mystx.app.api.GeminiClient
+import com.mystx.app.api.OpenAICompatibleClient
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.Dispatchers
 import kotlin.math.max
@@ -78,8 +76,7 @@ fun DraggableExplainPopup(
                     isLoading = false
                     result = cached
                 }
-                return@withContext
-            }
+            } else {
 
             val outcome = runTextCommand(
                 context, keyManager, geminiClient, openAIClient,
@@ -97,6 +94,7 @@ fun DraggableExplainPopup(
                     is CommandOutcome.Refusal -> result = "Safety blocked"
                     is CommandOutcome.Unavailable -> result = outcome.message
                 }
+            }
             }
         }
     }
@@ -171,4 +169,3 @@ fun DraggableExplainPopup(
         }
     }
 }
-// Need to add DisposableEffect but wait, I can just patch it cleanly using sed or python.

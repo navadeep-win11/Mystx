@@ -2,7 +2,6 @@ package app.grapheneos.pdfviewer.properties
 import com.mystx.app.R
 
 import androidx.annotation.StringRes
-import com.mystx.app.R
 
 private const val TITLE_KEY = "Title"
 private const val AUTHOR_KEY = "Author"

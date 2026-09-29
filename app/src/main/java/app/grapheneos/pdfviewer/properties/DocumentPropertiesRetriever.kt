@@ -7,7 +7,6 @@ import android.provider.OpenableColumns
 import android.text.format.Formatter
 import android.util.Log
 import androidx.core.database.getLongOrNull
-import com.mystx.app.R
 import org.json.JSONException
 
 class DocumentPropertiesRetriever(
