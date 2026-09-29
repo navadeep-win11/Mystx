@@ -1,0 +1,1 @@
+- fix: bulletproof UI layout for popup results, add explicit timeouts and loading states
