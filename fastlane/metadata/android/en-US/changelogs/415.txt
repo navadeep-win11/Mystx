@@ -1,0 +1,2 @@
+- fix: resolve import error for Refresh icon in QuickExplainActivity
+- feat: remove popup timeout and add regenerate button to bypass cache
