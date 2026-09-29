@@ -42,8 +42,8 @@ fun PdfReaderScreen(
             onSelectionChanged = { text ->
                 val trimmed = text.trim()
                 if (trimmed.isNotEmpty() && trimmed != "null") {
-                    selectedText = trimmed
                     if (!isPopupVisible) {
+                        selectedText = trimmed
                         isExplainButtonVisible = true
                     }
                 } else {
