@@ -1,0 +1,1 @@
+- fix: lock selectedText while explain popup is visible to prevent request cancellation
