@@ -1,0 +1,48 @@
+--- app/src/main/java/com/mystx/app/ui/DraggableExplainPopup.kt
++++ app/src/main/java/com/mystx/app/ui/DraggableExplainPopup.kt
+@@ -19,6 +19,8 @@
+ import kotlinx.coroutines.launch
+ import kotlin.math.roundToInt
+ 
++import kotlinx.coroutines.TimeoutCancellationException
++import kotlinx.coroutines.withTimeout
+ import com.mystx.app.manager.KeyManager
+ import com.mystx.app.model.PrefKeys
+ import com.mystx.app.model.HistoryManager
+@@ -82,10 +84,12 @@
+             } else {
+ 
+             val outcome = try {
+-                runTextCommand(
+-                    context, keyManager, geminiClient, openAIClient,
+-                    prompt, selectedText
+-                )
++                withTimeout(15_000L) {
++                    runTextCommand(
++                        context, keyManager, geminiClient, openAIClient,
++                        prompt, selectedText
++                    )
++                }
++            } catch (e: TimeoutCancellationException) {
++                CommandOutcome.Failure("Network timeout (15s). The AI is not responding.")
+             } catch (e: Exception) {
+                 CommandOutcome.Failure("Error: ${e.message}")
+             }
+@@ -147,11 +151,13 @@
+                 Spacer(modifier = Modifier.height(8.dp))
+                 
+                 if (isLoading) {
+-                    Box(modifier = Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
+-                        CircularProgressIndicator()
++                    Column(modifier = Modifier.fillMaxWidth().padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
++                        CircularProgressIndicator()
++                        Spacer(modifier = Modifier.height(16.dp))
++                        Text("Fetching answer...", color = MaterialTheme.colorScheme.onSurface, fontSize = 13.sp)
+                     }
+                 } else {
+                     Text(
+-                        text = if (result.isNullOrBlank()) "No answer received from AI. It might have been blocked or returned empty. Try selecting different text." else result!!,
++                        text = if (result.isNullOrBlank()) "Error: API returned an empty response. Try selecting a different text." else result!!,
+                         fontSize = 15.sp,
+                         color = MaterialTheme.colorScheme.onSurface,
+                         modifier = Modifier.verticalScroll(rememberScrollState()).padding(bottom = 24.dp)

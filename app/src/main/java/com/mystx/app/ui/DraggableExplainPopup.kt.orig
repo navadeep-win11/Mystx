@@ -25,8 +25,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
-import kotlinx.coroutines.TimeoutCancellationException
-import kotlinx.coroutines.withTimeout
 
 import com.mystx.app.manager.KeyManager
 import com.mystx.app.model.PrefKeys
@@ -69,8 +67,8 @@ fun DraggableExplainPopup(
                 Analyze the following text:
                 "${selectedText}"
                 
-                If it is a single word or short phrase (like a name, URL, or domain), provide its meaning or identify what it is.
-                If it is a question, provide a concise answer. Do not refuse to answer.
+                If it is a single word or short phrase, provide its meaning and a simple example sentence.
+                If it is a question, provide a concise answer.
                 Please respond natively in ${lang}.
             """.trimIndent()
 
@@ -83,14 +81,10 @@ fun DraggableExplainPopup(
             } else {
 
             val outcome = try {
-                withTimeout(15_000L) {
-                    runTextCommand(
-                        context, keyManager, geminiClient, openAIClient,
-                        prompt, selectedText
-                    )
-                }
-            } catch (e: TimeoutCancellationException) {
-                CommandOutcome.Failure("Network timeout (15s). The AI is not responding.")
+                runTextCommand(
+                    context, keyManager, geminiClient, openAIClient,
+                    prompt, selectedText
+                )
             } catch (e: Exception) {
                 CommandOutcome.Failure("Error: ${e.message}")
             }
@@ -154,19 +148,16 @@ fun DraggableExplainPopup(
                 Spacer(modifier = Modifier.height(8.dp))
                 
                 if (isLoading) {
-                    Column(modifier = Modifier.fillMaxWidth().padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Box(modifier = Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
                         CircularProgressIndicator()
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text("Fetching answer...", color = MaterialTheme.colorScheme.onSurface, fontSize = 13.sp)
                     }
                 } else {
-                    Box(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(bottom = 24.dp)) {
-                        Text(
-                            text = if (result.isNullOrBlank()) "Error: API returned an empty response. Try selecting a different text." else result!!,
-                            fontSize = 15.sp,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
+                    Text(
+                        text = if (result.isNullOrBlank()) "No answer received from AI. It might have been blocked or returned empty. Try selecting different text." else result!!,
+                        fontSize = 15.sp,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.verticalScroll(rememberScrollState()).padding(bottom = 24.dp)
+                    )
                 }
             }
         }
