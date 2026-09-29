@@ -1,0 +1,7 @@
+- fix: resolve syntax error and remove BuildConfig reference in PdfViewerScreen
+- fix: resolve duplicate R imports and correct popup control flow
+- fix: restore launcher icons and fix missing imports in extracted popup
+- fix: remove duplicate app_name string
+- fix: resolve XML syntax error in strings.xml
+- fix: restore missing Mystx strings that were overwritten
+- fix: integrate complete GrapheneOS PdfViewer Android app source
