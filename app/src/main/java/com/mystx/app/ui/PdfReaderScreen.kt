@@ -123,6 +123,7 @@ fun PdfReaderScreen(
                                 val trimmed = text.trim()
                                 if (trimmed.isNotEmpty() && trimmed != "null") {
                                     selectedText = trimmed
+                                    isPopupVisible = true
                                 } else {
                                     if (!isPopupVisible) {
                                         selectedText = null
@@ -189,26 +190,7 @@ fun PdfReaderScreen(
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         }
 
-        // Aesthetic Floating Button that appears ONLY when text is selected
-        AnimatedVisibility(
-            visible = selectedText != null && !isPopupVisible,
-            enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
-            exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
-            modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 32.dp)
-        ) {
-            ExtendedFloatingActionButton(
-                onClick = {
-                    isPopupVisible = true
-                },
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-                shape = RoundedCornerShape(24.dp)
-            ) {
-                Icon(Icons.Default.Search, contentDescription = null)
-                Spacer(Modifier.width(8.dp))
-                Text("✨ Explain")
-            }
-        }
+
 
         IconButton(
             onClick = onClose,
