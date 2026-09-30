@@ -129,6 +129,7 @@ fun DashboardScreen(keyManager: KeyManager, commandManager: CommandManager, stat
     var updateInfo by remember { mutableStateOf<UpdateChecker.UpdateInfo?>(null) }
     val scope = rememberCoroutineScope()
     val uriHandler = LocalUriHandler.current
+    var showAccessibilityDisclosure by remember { mutableStateOf(false) }
 
     val pdfPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument(),
@@ -225,7 +226,7 @@ fun DashboardScreen(keyManager: KeyManager, commandManager: CommandManager, stat
                         MystGradientButton(
                             text = stringResource(R.string.service_enable),
                             onClick = {
-                                context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+                                showAccessibilityDisclosure = true
                             }
                         )
                     }
@@ -336,7 +337,7 @@ fun DashboardScreen(keyManager: KeyManager, commandManager: CommandManager, stat
                         onClick = {
                             clearCrashMarker(context)
                             showKilledBanner = false
-                            context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+                            showAccessibilityDisclosure = true
                         },
                         modifier = Modifier.weight(1f)
                     )
@@ -434,5 +435,26 @@ fun DashboardScreen(keyManager: KeyManager, commandManager: CommandManager, stat
                 }
             }
         }
+    }
+
+    if (showAccessibilityDisclosure) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { showAccessibilityDisclosure = false },
+            title = { androidx.compose.material3.Text(stringResource(R.string.accessibility_disclosure_title)) },
+            text = { androidx.compose.material3.Text(stringResource(R.string.accessibility_disclosure_text)) },
+            confirmButton = {
+                androidx.compose.material3.TextButton(onClick = {
+                    showAccessibilityDisclosure = false
+                    context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+                }) {
+                    androidx.compose.material3.Text(stringResource(R.string.accessibility_disclosure_agree))
+                }
+            },
+            dismissButton = {
+                androidx.compose.material3.TextButton(onClick = { showAccessibilityDisclosure = false }) {
+                    androidx.compose.material3.Text(stringResource(R.string.commands_cancel))
+                }
+            }
+        )
     }
 }

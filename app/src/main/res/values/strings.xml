@@ -262,4 +262,7 @@
     <string name="zoom_range">Percentage (%1$d–%2$d%%)</string>
 
     <string name="unknown_file_size">Unknown</string>
+    <string name="accessibility_disclosure_title">Accessibility Service Required</string>
+    <string name="accessibility_disclosure_text">Mystx needs accessibility access to read the text you type and replace it with AI-generated text. We do not store or transmit this data anywhere other than to your chosen AI provider.</string>
+    <string name="accessibility_disclosure_agree">Agree and Continue</string>
 </resources>

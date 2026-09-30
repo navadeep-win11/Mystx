@@ -65,6 +65,7 @@ class MystxApp : Application() {
     }
 
     private fun scheduleUpdateCheck() {
+        if (!BuildConfig.ENABLE_UPDATER) return
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .build()

@@ -249,12 +249,12 @@ jobs:
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
 
-      - name: Build Release APK
+      - name: Build Release APK & AAB
         shell: bash
         run: |
           result=1
           for i in 1 2 3; do
-            ./gradlew assembleRelease --parallel --build-cache --no-daemon --configuration-cache-problems=warn --stacktrace \
+            ./gradlew assembleRelease bundleRelease --parallel --build-cache --no-daemon --configuration-cache-problems=warn --stacktrace \
               -PversionCode="$VERSION_CODE" \
               -PversionName="$VERSION_NAME" && { result=0; break; }
             echo "::warning::Build attempt $i failed, retrying..."
@@ -299,17 +299,21 @@ jobs:
           BUILD_TOOLS=$(ls -d $ANDROID_HOME/build-tools/*/ | sort -V | tail -1)
           ${BUILD_TOOLS}apksigner verify --print-certs app/build/outputs/apk/release/app-release.apk
 
-      - name: Rename APK
+      - name: Rename APK and AAB
         shell: bash
         env:
           TAG: ${{ needs.version.outputs.tag }}
-        run: mv app/build/outputs/apk/release/app-release.apk "app/build/outputs/apk/release/Mystx-${TAG}.apk"
+        run: |
+          mv app/build/outputs/apk/release/app-release.apk "app/build/outputs/apk/release/Mystx-${TAG}.apk"
+          mv app/build/outputs/bundle/release/app-release.aab "app/build/outputs/bundle/release/Mystx-${TAG}.aab"
 
-      - name: Upload APK artifact
+      - name: Upload Artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: Mystx-${{ needs.version.outputs.tag }}
-          path: app/build/outputs/apk/release/Mystx-*.apk
+          path: |
+            app/build/outputs/apk/release/Mystx-*.apk
+            app/build/outputs/bundle/release/Mystx-*.aab
           retention-days: 90
 
   tag:
@@ -452,6 +456,7 @@ jobs:
           tag_name: ${{ needs.version.outputs.tag }}
           files: |
             artifacts/Mystx-*.apk
+            artifacts/Mystx-*.aab
             artifacts/versionCode.txt
           name: Mystx ${{ needs.version.outputs.tag }}
           body_path: /tmp/changelog.md

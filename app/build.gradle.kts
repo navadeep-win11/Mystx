@@ -1,7 +1,6 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.plugin.compose")
-    id("com.google.gms.google-services")
 }
 
 val baseVersion = "2.0"
@@ -16,6 +15,7 @@ android {
         targetSdk = 36
         versionCode = (project.findProperty("versionCode") as String?)?.toIntOrNull() ?: 1
         versionName = (project.findProperty("versionName") as String?) ?: "$baseVersion-dev"
+        buildConfigField("boolean", "ENABLE_UPDATER", (project.findProperty("playStore") == null).toString())
 
         // Ship exactly the locales that exist in res/, and nothing else.
         //
@@ -130,8 +130,6 @@ kotlin {
 }
 
 dependencies {
-    implementation(platform("com.google.firebase:firebase-bom:33.4.0"))
-    implementation("com.google.firebase:firebase-analytics")
     implementation("androidx.webkit:webkit:1.11.0")
     implementation("androidx.core:core-ktx:1.19.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.11.0")

@@ -28,11 +28,6 @@
                 <data android:mimeType="text/*" />
             <data android:mimeType="text/plain" /></intent-filter>
             
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https" />
-            </intent-filter>
         <intent-filter android:label="@string/mystx_commands"><action android:name="android.intent.action.SEND" /><category android:name="android.intent.category.DEFAULT" /><data android:mimeType="text/plain" /></intent-filter></activity>
 
         <activity android:name=".ui.processtext.QuickExplainActivity" android:exported="true" android:label="@string/mystx_explain" android:excludeFromRecents="true" android:theme="@style/Theme.Mystx.Dialog">
