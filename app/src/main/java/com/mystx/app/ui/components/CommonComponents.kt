@@ -1,6 +1,6 @@
-import androidx.compose.ui.window.DialogProperties
 package com.mystx.app.ui.components
 
+import androidx.compose.ui.window.DialogProperties
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
@@ -448,9 +448,6 @@ fun MystEmptyState(
 }
 
 /** Glass-styled confirm dialog shared by every destructive/confirm flow. */
-@Composable
-
-
 @Composable
 fun MystDialog(
     title: String,
