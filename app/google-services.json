@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1018212151910",
+    "project_id": "navadeep-4e3dd",
+    "storage_bucket": "navadeep-4e3dd.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1018212151910:android:905c9c3bdb8589c39bf3a7",
+        "android_client_info": {
+          "package_name": "com.mystx.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBHcp_CwA0_ZKYilXKyp2ygI6dG_ASoI2I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
