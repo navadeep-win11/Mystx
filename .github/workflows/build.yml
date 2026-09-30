@@ -362,7 +362,7 @@ jobs:
           # Generate changelog from commit messages, skip merge commits and CI noise
           CHANGELOG=$(git log "$RANGE" --pretty=format:"- %s" --no-merges \
             | grep -iv "^- \(ci:\|merge\|changelog\|bump\|docs(fastlane)\)" \
-            | head -20)
+            | head -20 || true)
           if [ -z "$CHANGELOG" ]; then
             CHANGELOG="- Maintenance and bug fixes"
           fi
