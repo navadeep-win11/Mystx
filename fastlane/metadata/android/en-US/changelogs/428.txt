@@ -1,0 +1,7 @@
+- chore: Play Store compliance fixes (v2.0.37)
+- docs: add GEMINI.md to persist project-specific AI rules
+- fix: resolve kotlin compile error caused by incorrect import order
+- feat: add google analytics / firebase integration
+- fix: adjust bottom padding for 3-button nav, force update dialog to redirect to custom domain
+- fix: change explain popup background to background color to prevent white-on-white text invisibility
+- fix: lock selectedText while explain popup is visibl
