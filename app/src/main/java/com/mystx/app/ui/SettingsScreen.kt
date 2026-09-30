@@ -215,7 +215,7 @@ fun SettingsScreen(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 20.dp).padding(top = 16.dp).padding(bottom = 112.dp)
+            .padding(horizontal = 20.dp).padding(top = 16.dp).padding(bottom = 150.dp)
     ) {
         ScreenTitle(stringResource(R.string.settings_title))
 

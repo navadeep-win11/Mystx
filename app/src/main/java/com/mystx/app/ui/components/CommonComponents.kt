@@ -1,3 +1,4 @@
+import androidx.compose.ui.window.DialogProperties
 package com.mystx.app.ui.components
 
 import androidx.annotation.StringRes
@@ -448,16 +449,21 @@ fun MystEmptyState(
 
 /** Glass-styled confirm dialog shared by every destructive/confirm flow. */
 @Composable
+
+
+@Composable
 fun MystDialog(
     title: String,
     message: String,
     confirmLabel: String,
     onConfirm: () -> Unit,
     onDismissRequest: () -> Unit,
-    dismissLabel: String? = null
+    dismissLabel: String? = null,
+    isCancellable: Boolean = true
 ) {
     AlertDialog(
         onDismissRequest = onDismissRequest,
+        properties = DialogProperties(dismissOnBackPress = isCancellable, dismissOnClickOutside = isCancellable),
         shape = MystCardShape,
         containerColor = if (isSystemInDarkTheme()) Color(0xFF2C2C2E) else Color(0xFFE5E5EA),
         title = {

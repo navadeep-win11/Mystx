@@ -90,7 +90,7 @@ fun CommandsScreen(commandManager: CommandManager) {
         modifier = Modifier
             .fillMaxSize()
             .graphicsLayer { }
-            .padding(horizontal = 20.dp).padding(top = 16.dp).padding(bottom = 112.dp)
+            .padding(horizontal = 20.dp).padding(top = 16.dp).padding(bottom = 150.dp)
     ) {
         ScreenTitle(stringResource(R.string.commands_title))
 
